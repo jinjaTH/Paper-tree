@@ -1,27 +1,41 @@
 # Paper Tree Theory — Tree Assessment
 
-A psychology self-assessment based on **Paper Tree Theory**, which views the mind as a living tree that grows through interpretation and is shaped by those around it.
+A psychology self-assessment grounded in **Paper Tree Theory** (ทฤษฎีต้นไม้กระดาษ), a conceptual framework that models the architecture of the human mind as a living tree surrounded by falling papers.
 
-Built as a single-file HTML application. No backend, no data collection, no external API calls.
+**Framework conceived by jinje · Interface developed by Claude**
 
 ---
 
-## What it does
+## What it measures
 
-Users answer 18 questions across 6 psychological dimensions, then receive a personalized tree visualization and written analysis.
+The assessment maps 6 psychological dimensions derived from the Paper Tree Theory framework:
 
-**Dimensions measured:**
+| Dimension | What it captures | Tree visual |
+|---|---|---|
+| Self-Health | Identity stability and resilience | Trunk height, thickness, crack |
+| Interpretive Pattern | Flexibility in reading events | Branch spread angle |
+| Core Belief Density | How fixed core beliefs are | Red frame marks on trunk |
+| Internal Weather | Current cognitive/emotional state | Paper density, leaf coverage |
+| Sensitivity to Outside Influence | How easily others pre-color your papers | Trunk lean, dashed external lines |
+| Processing of Past Experience | Whether old experiences are integrated | Root depth, surface tangles |
 
-| Dimension | What it captures |
-|---|---|
-| Self-Health | Identity stability and resilience |
-| Interpretive Pattern | Flexibility in how you read events |
-| Core Belief Density | How fixed your foundational beliefs are |
-| Internal Weather | Current emotional/cognitive state |
-| Sensitivity to Outside Influence | How easily others shape your thinking |
-| Processing of Past Experience | Whether old experiences are integrated or still pending |
+Each tree generated is unique and **psychologically meaningful** — different scores produce visually distinct trees, not just size variations.
 
 **Languages:** Thai · English · Japanese
+
+---
+
+## The framework
+
+Paper Tree Theory (2026, jinje) proposes that the mind is not a blank sheet but a vast, boundless space with a living tree at its center. Five core elements interact in a continuous cycle:
+
+- **White Space** — unactualized potential
+- **The Tree** — the Self, existing before experience
+- **Papers** — experiences, memories, thoughts (which can be pre-colored by other trees)
+- **The Faceless Child** — the interpretive agent (faceless because identity is not fixed)
+- **Frames** — core beliefs; more influential than ordinary papers, harder to remove
+
+The primary loop: Tree → Papers → Drawing (interpretation) → Root Absorption → back to Tree.
 
 ---
 
@@ -44,51 +58,44 @@ python -m http.server 8080
 
 ## Features
 
-- **Adaptive questions** — question flow responds to answers
-- **Visual tree** — canvas drawing reflects your 6 dimension scores
-- **Seeded tree rendering** — same answers always produce the same tree
-- **Keyboard navigation**
-  - Scale questions: press `1`–`5` to select
-  - Scenario questions: press `A`–`D` to select
-  - `→` or `Enter` to advance · `←` to go back
-- **Back button** — navigate to previous questions
-- **Save as PDF** — browser print dialog renders result cleanly
-- **Share results** — encodes scores in URL hash, copies link to clipboard
-- **Take again** — restart from language selection
+- **Adaptive question flow** — 18 questions across 6 dimensions
+- **Procedural tree** — grown from your psychological profile using a seeded fractal algorithm; same answers always produce the same tree
+- **Animated growth** — roots → trunk → branches → frame marks → leaves, sequenced to feel organic
+- **OMORI-inspired aesthetic** — cream paper, near-black ink, OMORI red used only for core belief frames
+- **Background particles** — floating paper scraps drift in the background
+- **Typewriter rendering** — questions appear character by character
+- **Keyboard navigation** — `1–5` for scale, `A–D` for scenario, `→`/`Enter` next, `←` back
+- **Share results** — encodes scores in URL hash; copy link to share your tree
+- **Save as PDF** — clean print CSS hides all navigation
+- **Restart** — return to language selection
 
 ---
 
-## Security notes
+## Security
 
-This file was reviewed for common client-side vulnerabilities:
+This app sends no data anywhere. All answers, scores, and tree rendering happen in the browser session only.
 
 | Issue | Status |
 |---|---|
-| XSS via innerHTML | Fixed — scenario options built with `textContent`; dynamic values escaped with `esc()` |
-| Unbounded text input | Fixed — textarea limited to 500 characters via `maxlength` |
-| Global score exposure | Fixed — `_dimScores` is module-scoped, not on `window` |
-| Tampered share URL | Fixed — `parseShareHash` validates lang, numeric range, and structure before use |
-| Content Security Policy | Added — `<meta http-equiv="Content-Security-Policy">` blocks external script injection and outbound connections (`connect-src: none`) |
-| Data exfiltration | Not applicable — no network requests are made after page load; all data stays in-browser |
-
-**The app sends no data anywhere.** Answers, scores, and the tree visualization exist only in the browser session. Clearing the page discards everything.
+| XSS via innerHTML | Fixed — all dynamic values use `textContent` or `esc()` sanitizer |
+| Unbounded text input | Fixed — textarea `maxlength=500` |
+| Score exposure | Fixed — `_dimScores` is module-scoped, not on `window` |
+| Share URL tampering | Fixed — hash decoded with range + structure validation |
+| Content Security Policy | Added — `connect-src: none` blocks all outbound requests |
 
 ---
 
 ## File structure
 
 ```
-index.html   — complete app (HTML + CSS + JS, single file)
-README.md    — this file
-.gitignore   — standard web project ignores
+index.html         — complete app (single file, no dependencies)
+README.md          — this file
+.gitignore
+.claude/           — design skills (impeccable, animate, harden, etc.)
+.impeccable.md     — design context for this project
 ```
 
 ---
 
-## Based on
-
-**Paper Tree Theory** — a psychological framework developed in 2026 that maps mental architecture using the metaphor of a tree: roots (past experience), trunk (core beliefs), branches (interpretive patterns), canopy (self), weather (internal state), and external forces (outside influence).
-
----
-
-*Paper Tree Theory · 2026 · Results are a snapshot of today. Trees can always change.*
+*Paper Tree Theory framework conceived by jinje · Interface developed by Claude · 2026*
+*Trees can always change.*

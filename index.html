@@ -3,569 +3,405 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- CSP: blocks inline script injection from third parties, allows only self + Google Fonts + data URIs for canvas export -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'none';">
 <title>Paper Tree Theory — Tree Assessment</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Space+Mono:ital@0;1&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,wght@0,400;0,700;1,400&family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=Fira+Code:wght@400;500&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --white: #f5f4f0;
-    --black: #1a1a18;
-    --grey-light: #dddbd4;
-    --grey-mid: #9e9c94;
-    --grey-dark: #4a4a44;
-    --accent: #c0392b;
-    --bg: #f5f4f0;
-  }
+/* ── TOKENS ── */
+:root {
+  --cream:      #f5f2ea;
+  --cream-dark: #ece9e1;
+  --ink:        #181715;
+  --ink-60:     rgba(24,23,21,0.6);
+  --ink-30:     rgba(24,23,21,0.3);
+  --ink-12:     rgba(24,23,21,0.12);
+  --ink-05:     rgba(24,23,21,0.05);
+  --mid:        #6b6860;
+  --faint:      #ccc9c2;
+  --red:        #ad1f19;
+  --red-dim:    rgba(173,31,25,0.5);
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  --ff-display: 'Bodoni Moda', Georgia, serif;
+  --ff-body:    'Libre Caslon Text', Georgia, serif;
+  --ff-mono:    'Fira Code', 'Courier New', monospace;
+  --ff-hand:    'Caveat', cursive;
 
-  body {
-    background: var(--bg);
-    color: var(--black);
-    font-family: 'Space Mono', monospace;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-  }
+  --sp-xs: 4px; --sp-sm: 8px; --sp-md: 16px; --sp-lg: 24px;
+  --sp-xl: 40px; --sp-2xl: 64px; --sp-3xl: 96px;
+}
 
-  /* ── SCREENS ── */
-  .screen { display: none; width: 100%; max-width: 680px; }
-  .screen.active { display: block; }
+/* ── RESET ── */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+button { font: inherit; cursor: pointer; border: none; background: none; }
 
-  /* ── LANG SELECT ── */
-  #screen-lang {
-    text-align: center;
-    padding: 80px 0;
-  }
-  #screen-lang .sigil {
-    font-family: 'IM Fell English', serif;
-    font-size: 11px;
-    letter-spacing: 0.3em;
-    color: var(--grey-mid);
-    text-transform: uppercase;
-    margin-bottom: 60px;
-  }
-  #screen-lang h1 {
-    font-family: 'IM Fell English', serif;
-    font-size: clamp(28px, 5vw, 42px);
-    font-weight: 400;
-    line-height: 1.2;
-    margin-bottom: 12px;
-  }
-  #screen-lang .sub {
-    font-size: 11px;
-    color: var(--grey-mid);
-    letter-spacing: 0.15em;
-    margin-bottom: 64px;
-  }
-  .lang-buttons {
-    display: flex;
-    gap: 16px;
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-  .lang-btn {
-    font-family: 'IM Fell English', serif;
-    font-size: 16px;
-    background: none;
-    border: 1px solid var(--grey-light);
-    color: var(--black);
-    padding: 14px 32px;
-    cursor: pointer;
-    transition: all 0.2s;
-    letter-spacing: 0.05em;
-  }
-  .lang-btn:hover {
-    background: var(--black);
-    color: var(--white);
-    border-color: var(--black);
-  }
+/* ── BASE ── */
+body {
+  background-color: var(--cream);
+  background-image: repeating-linear-gradient(
+    transparent, transparent 27px,
+    var(--ink-05) 27px, var(--ink-05) 28px
+  );
+  background-size: 100% 28px;
+  color: var(--ink);
+  font-family: var(--ff-body);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-lg);
+}
 
-  /* ── INTRO ── */
-  #screen-intro { padding: 60px 0; }
-  .intro-label {
-    font-size: 10px;
-    letter-spacing: 0.35em;
-    color: var(--grey-mid);
-    text-transform: uppercase;
-    margin-bottom: 40px;
-  }
-  .intro-title {
-    font-family: 'IM Fell English', serif;
-    font-size: clamp(24px, 4vw, 36px);
-    font-weight: 400;
-    line-height: 1.35;
-    margin-bottom: 32px;
-  }
-  .intro-body {
-    font-size: 12px;
-    line-height: 1.9;
-    color: var(--grey-dark);
-    max-width: 520px;
-    margin-bottom: 48px;
-  }
-  .intro-body p + p { margin-top: 16px; }
-  .intro-meta {
-    display: flex;
-    gap: 32px;
-    margin-bottom: 48px;
-    flex-wrap: wrap;
-  }
-  .meta-item {
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    color: var(--grey-mid);
-    text-transform: uppercase;
-  }
-  .meta-item span {
-    display: block;
-    font-size: 13px;
-    color: var(--black);
-    letter-spacing: 0;
-    margin-top: 4px;
-    font-family: 'IM Fell English', serif;
-  }
-  .btn-primary {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    background: var(--black);
-    color: var(--white);
-    border: none;
-    padding: 16px 40px;
-    cursor: pointer;
-    transition: opacity 0.2s;
-  }
-  .btn-primary:hover { opacity: 0.75; }
+/* Paper grain overlay */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 9000;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 300px 300px;
+  opacity: 0.045;
+  mix-blend-mode: multiply;
+}
 
-  /* ── QUESTION ── */
-  #screen-question { padding: 40px 0; }
-  .q-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin-bottom: 48px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--grey-light);
-  }
-  .q-dim {
-    font-size: 10px;
-    letter-spacing: 0.3em;
-    color: var(--grey-mid);
-    text-transform: uppercase;
-  }
-  .q-counter {
-    font-family: 'IM Fell English', serif;
-    font-size: 13px;
-    color: var(--grey-mid);
-  }
-  .q-progress-bar {
-    width: 100%;
-    height: 1px;
-    background: var(--grey-light);
-    margin-bottom: 48px;
-    position: relative;
-  }
-  .q-progress-fill {
-    height: 1px;
-    background: var(--black);
-    transition: width 0.4s ease;
-  }
-  .q-text {
-    font-family: 'IM Fell English', serif;
-    font-size: clamp(18px, 3vw, 26px);
-    font-weight: 400;
-    line-height: 1.5;
-    margin-bottom: 8px;
-  }
-  .q-context {
-    font-size: 11px;
-    color: var(--grey-mid);
-    font-style: italic;
-    margin-bottom: 40px;
-    line-height: 1.6;
-  }
+/* Background particles canvas */
+#bg-particles {
+  position: fixed; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
 
-  /* SCENARIO */
-  .scenario-options {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .scenario-opt {
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    line-height: 1.7;
-    background: none;
-    border: 1px solid var(--grey-light);
-    color: var(--black);
-    padding: 16px 20px;
-    cursor: pointer;
-    text-align: left;
-    transition: all 0.15s;
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-  }
-  .scenario-opt .opt-label {
-    font-family: 'IM Fell English', serif;
-    font-size: 13px;
-    color: var(--grey-mid);
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-  .scenario-opt:hover, .scenario-opt.selected {
-    background: var(--black);
-    color: var(--white);
-    border-color: var(--black);
-  }
-  .scenario-opt:hover .opt-label, .scenario-opt.selected .opt-label {
-    color: var(--grey-light);
-  }
+/* ── SCREENS ── */
+.screen { display: none; width: 100%; max-width: 680px; position: relative; z-index: 1; }
+.screen.active { display: block; }
 
-  /* SCALE */
-  .scale-wrap { margin: 8px 0 32px; }
-  .scale-labels {
-    display: flex;
-    justify-content: space-between;
-    font-size: 10px;
-    color: var(--grey-mid);
-    letter-spacing: 0.1em;
-    margin-bottom: 16px;
-  }
-  .scale-buttons {
-    display: flex;
-    gap: 8px;
-  }
-  .scale-btn {
-    flex: 1;
-    aspect-ratio: 1;
-    background: none;
-    border: 1px solid var(--grey-light);
-    font-family: 'IM Fell English', serif;
-    font-size: 16px;
-    color: var(--grey-mid);
-    cursor: pointer;
-    transition: all 0.15s;
-    max-width: 60px;
-  }
-  .scale-btn:hover, .scale-btn.selected {
-    background: var(--black);
-    color: var(--white);
-    border-color: var(--black);
-  }
+@keyframes slideIn {
+  from { opacity: 0; transform: perspective(900px) translateX(28px) rotateY(-2.5deg); }
+  to   { opacity: 1; transform: perspective(900px) translateX(0) rotateY(0deg); }
+}
+@keyframes slideInBack {
+  from { opacity: 0; transform: perspective(900px) translateX(-28px) rotateY(2.5deg); }
+  to   { opacity: 1; transform: perspective(900px) translateX(0) rotateY(0deg); }
+}
+@keyframes slideOut {
+  to { opacity: 0; transform: translateX(-20px); }
+}
+.screen.entering-fwd  { animation: slideIn     0.38s cubic-bezier(0.16,1,0.3,1) forwards; }
+.screen.entering-back { animation: slideInBack 0.38s cubic-bezier(0.16,1,0.3,1) forwards; }
+.screen.exiting       { animation: slideOut    0.22s ease-in forwards; pointer-events: none; }
 
-  /* WORD SELECT */
-  .word-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 32px;
-  }
-  .word-chip {
-    font-family: 'IM Fell English', serif;
-    font-size: 14px;
-    background: none;
-    border: 1px solid var(--grey-light);
-    color: var(--black);
-    padding: 8px 18px;
-    cursor: pointer;
-    transition: all 0.15s;
-    font-style: italic;
-  }
-  .word-chip:hover, .word-chip.selected {
-    background: var(--black);
-    color: var(--white);
-    border-color: var(--black);
-  }
-  .word-instruction {
-    font-size: 10px;
-    color: var(--grey-mid);
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    margin-bottom: 20px;
-  }
+/* ── LANG SELECT ── */
+#screen-lang { text-align: center; padding: var(--sp-3xl) 0; }
+.lang-sigil {
+  font-family: var(--ff-mono); font-size: 10px;
+  letter-spacing: 0.35em; color: var(--mid);
+  text-transform: uppercase; margin-bottom: var(--sp-2xl);
+}
+.lang-tree-icon { margin-bottom: var(--sp-xl); opacity: 0.7; }
+.lang-title {
+  font-family: var(--ff-display); font-size: clamp(30px, 6vw, 50px);
+  font-weight: 400; line-height: 1.1; margin-bottom: var(--sp-sm);
+}
+.lang-sub {
+  font-family: var(--ff-mono); font-size: 10px; color: var(--mid);
+  letter-spacing: 0.2em; margin-bottom: var(--sp-2xl);
+}
+.lang-buttons { display: flex; gap: var(--sp-md); justify-content: center; flex-wrap: wrap; }
+.lang-btn {
+  font-family: var(--ff-display); font-size: 15px;
+  border: 1px solid var(--faint); color: var(--ink);
+  padding: 13px 30px; letter-spacing: 0.04em;
+  transition: background 0.18s, color 0.18s, border-color 0.18s;
+}
+.lang-btn:hover { background: var(--ink); color: var(--cream); border-color: var(--ink); }
 
-  /* TEXT INPUT */
-  .text-input-wrap { margin-bottom: 32px; }
-  .text-input-field {
-    width: 100%;
-    font-family: 'Space Mono', monospace;
-    font-size: 12px;
-    background: none;
-    border: none;
-    border-bottom: 1px solid var(--grey-light);
-    color: var(--black);
-    padding: 12px 0;
-    outline: none;
-    transition: border-color 0.2s;
-    line-height: 1.6;
-    resize: none;
-  }
-  .text-input-field:focus { border-bottom-color: var(--black); }
-  .text-input-field::placeholder { color: var(--grey-mid); }
+/* ── INTRO ── */
+#screen-intro { padding: var(--sp-2xl) 0; }
+.intro-eyebrow {
+  font-family: var(--ff-mono); font-size: 10px;
+  letter-spacing: 0.35em; color: var(--mid);
+  text-transform: uppercase; margin-bottom: var(--sp-xl);
+}
+.intro-title {
+  font-family: var(--ff-display); font-size: clamp(22px, 4vw, 34px);
+  font-weight: 400; line-height: 1.3; margin-bottom: var(--sp-lg);
+}
+.intro-quote {
+  font-family: var(--ff-body); font-style: italic;
+  font-size: 13px; color: var(--mid); line-height: 1.8;
+  border-left: 1px solid var(--faint); padding-left: var(--sp-md);
+  margin-bottom: var(--sp-lg);
+}
+.intro-body {
+  font-family: var(--ff-body); font-size: 13px;
+  line-height: 1.9; color: var(--mid); max-width: 520px;
+  margin-bottom: var(--sp-xl);
+}
+.intro-body p + p { margin-top: var(--sp-md); }
+.intro-meta { display: flex; gap: var(--sp-xl); margin-bottom: var(--sp-xl); flex-wrap: wrap; }
+.meta-item {
+  font-family: var(--ff-mono); font-size: 9px;
+  letter-spacing: 0.25em; color: var(--mid); text-transform: uppercase;
+}
+.meta-item span {
+  display: block; font-family: var(--ff-display); font-size: 13px;
+  color: var(--ink); letter-spacing: 0; margin-top: 5px;
+}
 
-  .q-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 32px;
-  }
-  .btn-back {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    background: none;
-    border: none;
-    color: var(--grey-mid);
-    padding: 12px 0;
-    cursor: pointer;
-    transition: color 0.15s;
-  }
-  .btn-back:hover { color: var(--black); }
-  .btn-back:disabled { opacity: 0; pointer-events: none; }
-  .btn-next {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    background: none;
-    border: 1px solid var(--black);
-    color: var(--black);
-    padding: 12px 28px;
-    cursor: pointer;
-    transition: all 0.15s;
-    opacity: 0.3;
-    pointer-events: none;
-  }
-  .btn-next.enabled {
-    opacity: 1;
-    pointer-events: all;
-  }
-  .btn-next.enabled:hover {
-    background: var(--black);
-    color: var(--white);
-  }
-  .key-hint {
-    font-size: 9px;
-    color: var(--grey-light);
-    letter-spacing: 0.15em;
-    text-align: right;
-    margin-top: 10px;
-    text-transform: uppercase;
-    min-height: 14px;
-    user-select: none;
-  }
+/* ── QUESTION ── */
+#screen-question { padding: var(--sp-xl) 0; }
+.q-header {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  margin-bottom: var(--sp-xl); padding-bottom: var(--sp-md);
+  border-bottom: 1px solid var(--faint);
+}
+.q-dim { font-family: var(--ff-mono); font-size: 9px; letter-spacing: 0.35em; color: var(--mid); text-transform: uppercase; }
+.q-counter { font-family: var(--ff-display); font-size: 13px; color: var(--mid); font-style: italic; }
+.q-progress-bar { width: 100%; height: 1px; background: var(--faint); margin-bottom: var(--sp-xl); }
+.q-progress-fill { height: 1px; background: var(--ink); transition: width 0.5s cubic-bezier(0.16,1,0.3,1); }
 
-  /* ── RESULT ── */
-  #screen-result { padding: 40px 0 80px; }
-  .result-header {
-    margin-bottom: 48px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--grey-light);
-  }
-  .result-label {
-    font-size: 10px;
-    letter-spacing: 0.35em;
-    color: var(--grey-mid);
-    text-transform: uppercase;
-    margin-bottom: 12px;
-  }
-  .result-title {
-    font-family: 'IM Fell English', serif;
-    font-size: clamp(22px, 4vw, 32px);
-    font-weight: 400;
-    line-height: 1.3;
-  }
+.q-text {
+  font-family: var(--ff-display); font-size: clamp(17px, 2.8vw, 25px);
+  font-weight: 400; line-height: 1.5; margin-bottom: var(--sp-sm);
+  min-height: 2.5em;
+}
+/* Typewriter cursor */
+.q-text.typing::after { content: '|'; animation: blink 0.65s step-end infinite; }
+@keyframes blink { from,to{opacity:1} 50%{opacity:0} }
 
-  .tree-canvas-wrap {
-    margin: 0 auto 48px;
-    display: flex;
-    justify-content: center;
-  }
-  canvas#treeCanvas {
-    border: 1px solid var(--grey-light);
-    display: block;
-  }
+.q-context {
+  font-family: var(--ff-body); font-size: 11px; font-style: italic;
+  color: var(--mid); margin-bottom: var(--sp-xl); line-height: 1.6;
+  min-height: 1.2em;
+}
 
-  .dimension-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    margin-bottom: 48px;
-  }
-  .dim-row {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .dim-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-  }
-  .dim-name {
-    font-size: 10px;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: var(--grey-dark);
-  }
-  .dim-score-label {
-    font-family: 'IM Fell English', serif;
-    font-size: 13px;
-    color: var(--grey-mid);
-    font-style: italic;
-  }
-  .dim-bar-bg {
-    height: 2px;
-    background: var(--grey-light);
-    width: 100%;
-  }
-  .dim-bar-fill {
-    height: 2px;
-    background: var(--black);
-    transition: width 1.2s cubic-bezier(0.16,1,0.3,1);
-  }
-  .dim-desc {
-    font-size: 11px;
-    color: var(--grey-mid);
-    line-height: 1.7;
-    margin-top: 4px;
-  }
+/* SCALE */
+.scale-wrap { margin-bottom: var(--sp-xl); }
+.scale-labels {
+  display: flex; justify-content: space-between;
+  font-family: var(--ff-mono); font-size: 9px; color: var(--mid);
+  letter-spacing: 0.1em; margin-bottom: var(--sp-md);
+}
+.scale-buttons { display: flex; gap: var(--sp-sm); }
+.scale-btn {
+  flex: 1; aspect-ratio: 1; max-width: 58px;
+  border: 1px solid var(--faint); color: var(--mid);
+  font-family: var(--ff-display); font-size: 16px;
+  position: relative; overflow: hidden;
+  transition: color 0.18s, border-color 0.18s;
+}
+.scale-btn::after {
+  content: ''; position: absolute; inset: 0;
+  background: var(--ink);
+  clip-path: circle(0% at 50% 50%);
+  transition: clip-path 0.28s cubic-bezier(0.16,1,0.3,1);
+  z-index: 0;
+}
+.scale-btn span { position: relative; z-index: 1; }
+.scale-btn.selected { color: var(--cream); border-color: var(--ink); }
+.scale-btn.selected::after { clip-path: circle(75% at 50% 50%); }
+.scale-btn:hover:not(.selected) { border-color: var(--ink-30); color: var(--ink); }
 
-  .result-summary {
-    border: 1px solid var(--grey-light);
-    padding: 28px;
-    margin-bottom: 32px;
-  }
-  .summary-label {
-    font-size: 10px;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: var(--grey-mid);
-    margin-bottom: 16px;
-  }
-  .summary-text {
-    font-family: 'IM Fell English', serif;
-    font-size: 15px;
-    line-height: 1.8;
-    color: var(--black);
-  }
+/* SCENARIO */
+.scenario-options { display: flex; flex-direction: column; gap: var(--sp-xs); }
+.scenario-opt {
+  border: 1px solid var(--faint); color: var(--ink);
+  padding: 15px 18px; text-align: left;
+  display: flex; gap: var(--sp-md); align-items: flex-start;
+  font-family: var(--ff-body); font-size: 12px; line-height: 1.75;
+  position: relative; overflow: hidden;
+  transition: color 0.22s, border-color 0.22s;
+}
+.scenario-opt::before {
+  content: ''; position: absolute; inset: 0;
+  background: var(--ink); width: 0;
+  transition: width 0.26s cubic-bezier(0.16,1,0.3,1);
+  z-index: 0;
+}
+.scenario-opt:hover::before { width: 100%; }
+.scenario-opt.selected::before { width: 100%; }
+.scenario-opt:hover, .scenario-opt.selected { color: var(--cream); border-color: var(--ink); }
+.opt-label {
+  font-family: var(--ff-display); font-size: 13px; color: var(--red);
+  flex-shrink: 0; margin-top: 2px; position: relative; z-index: 1;
+  transition: color 0.22s;
+}
+.scenario-opt:hover .opt-label,
+.scenario-opt.selected .opt-label { color: var(--faint); }
+.opt-text { position: relative; z-index: 1; }
 
-  /* Result action buttons */
-  .result-actions {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 40px;
-    flex-wrap: wrap;
-  }
-  .btn-action {
-    font-family: 'Space Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    background: none;
-    border: 1px solid var(--grey-light);
-    color: var(--grey-dark);
-    padding: 10px 20px;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
-  .btn-action:hover {
-    border-color: var(--black);
-    color: var(--black);
-  }
+/* WORD CHIPS */
+.word-instruction {
+  font-family: var(--ff-mono); font-size: 9px; color: var(--mid);
+  letter-spacing: 0.25em; text-transform: uppercase; margin-bottom: var(--sp-md);
+}
+.word-grid { display: flex; flex-wrap: wrap; gap: var(--sp-sm); margin-bottom: var(--sp-xl); }
+.word-chip {
+  font-family: var(--ff-body); font-style: italic; font-size: 13px;
+  border: 1px solid var(--faint); color: var(--ink);
+  padding: 6px 16px;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.word-chip:hover { border-color: var(--ink-30); }
+.word-chip.selected { background: var(--ink); color: var(--cream); border-color: var(--ink); }
 
-  .result-footer {
-    font-size: 10px;
-    color: var(--grey-mid);
-    letter-spacing: 0.15em;
-    text-align: center;
-    line-height: 2;
-  }
+/* TEXT INPUT */
+.text-input-wrap { margin-bottom: var(--sp-xl); }
+.text-input-field {
+  width: 100%; font-family: var(--ff-body); font-size: 13px;
+  background: none; border: none; border-bottom: 1px solid var(--faint);
+  color: var(--ink); padding: var(--sp-sm) 0; outline: none;
+  transition: border-color 0.2s; line-height: 1.7; resize: none;
+}
+.text-input-field:focus { border-bottom-color: var(--ink); }
+.text-input-field::placeholder { color: var(--faint); font-style: italic; }
 
-  /* Toast notification */
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%) translateY(80px);
-    background: var(--black);
-    color: var(--white);
-    font-family: 'Space Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.15em;
-    padding: 12px 24px;
-    transition: transform 0.3s ease;
-    pointer-events: none;
-    z-index: 100;
-    white-space: nowrap;
-  }
-  .toast.show { transform: translateX(-50%) translateY(0); }
+/* NAVIGATION */
+.q-nav { display: flex; justify-content: space-between; align-items: center; margin-top: var(--sp-xl); }
+.btn-back {
+  font-family: var(--ff-mono); font-size: 9px; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--faint);
+  padding: var(--sp-sm) 0; transition: color 0.15s;
+}
+.btn-back:hover { color: var(--mid); }
+.btn-back:disabled { opacity: 0; pointer-events: none; }
+.btn-next {
+  font-family: var(--ff-mono); font-size: 9px; letter-spacing: 0.25em;
+  text-transform: uppercase; border: 1px solid var(--ink); color: var(--ink);
+  padding: 11px 26px; opacity: 0.25; pointer-events: none;
+  transition: background 0.15s, color 0.15s, opacity 0.15s;
+}
+.btn-next.enabled { opacity: 1; pointer-events: all; }
+.btn-next.enabled:hover { background: var(--ink); color: var(--cream); }
+.key-hint {
+  font-family: var(--ff-mono); font-size: 9px; color: var(--faint);
+  letter-spacing: 0.12em; text-align: right; margin-top: var(--sp-sm);
+  min-height: 14px; user-select: none;
+}
 
-  /* Shared result banner */
-  .shared-banner {
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--grey-mid);
-    text-align: center;
-    padding: 10px;
-    border: 1px solid var(--grey-light);
-    margin-bottom: 32px;
-    display: none;
-  }
-  .shared-banner.visible { display: block; }
+/* ── PRIMARY BUTTON ── */
+.btn-primary {
+  font-family: var(--ff-mono); font-size: 10px; letter-spacing: 0.22em;
+  text-transform: uppercase; background: var(--ink); color: var(--cream);
+  padding: 15px 40px; transition: opacity 0.18s;
+}
+.btn-primary:hover { opacity: 0.72; }
 
-  /* fade transition */
-  .fade-in {
-    animation: fadeIn 0.5s ease forwards;
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+/* ── TRANSITION (full-screen dark) ── */
+#screen-transition {
+  position: fixed; inset: 0; max-width: none; z-index: 200;
+  background: #0d0d0a;
+  display: none;
+  flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; gap: var(--sp-xl);
+}
+#screen-transition.active { display: flex; }
+.tr-figure { opacity: 0.6; }
+.tr-text {
+  font-family: var(--ff-hand); font-size: 19px; color: #f0ede5;
+  line-height: 1.6; min-height: 2.5em; max-width: 340px;
+  letter-spacing: 0.02em;
+}
+.tr-text.typing::after { content: '|'; animation: blink 0.65s step-end infinite; color: var(--red); }
 
-  /* ── TRANSITION CARD ── */
-  #screen-transition {
-    text-align: center;
-    padding: 120px 0;
-  }
-  #screen-transition .tr-text {
-    font-family: 'IM Fell English', serif;
-    font-size: 15px;
-    color: var(--grey-mid);
-    font-style: italic;
-    animation: pulse 2s ease-in-out infinite;
-  }
-  @keyframes pulse {
-    0%, 100% { opacity: 0.4; }
-    50% { opacity: 1; }
-  }
+/* ── RESULT ── */
+#screen-result { padding: var(--sp-xl) 0 var(--sp-3xl); }
+.shared-banner {
+  font-family: var(--ff-mono); font-size: 9px; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--mid); text-align: center;
+  padding: var(--sp-sm) var(--sp-md);
+  border: 1px solid var(--faint); margin-bottom: var(--sp-xl);
+  display: none;
+}
+.shared-banner.visible { display: block; }
+.result-header { margin-bottom: var(--sp-xl); padding-bottom: var(--sp-lg); border-bottom: 1px solid var(--faint); }
+.result-eyebrow { font-family: var(--ff-mono); font-size: 9px; letter-spacing: 0.35em; color: var(--mid); text-transform: uppercase; margin-bottom: var(--sp-sm); }
+.result-title { font-family: var(--ff-display); font-size: clamp(22px, 4vw, 34px); font-weight: 400; line-height: 1.2; }
+.tree-canvas-wrap { margin: 0 auto var(--sp-xl); display: flex; justify-content: center; }
+canvas#treeCanvas { border: 1px solid var(--faint); display: block; }
 
-  /* ── PRINT ── */
-  @media print {
-    #screen-lang, #screen-intro, #screen-question, #screen-transition { display: none !important; }
-    #screen-result { display: block !important; }
-    .result-actions, .shared-banner { display: none !important; }
-    body { padding: 16px; background: white; }
-    canvas#treeCanvas { border: 1px solid #ccc; }
+.dimension-grid { display: flex; flex-direction: column; gap: 22px; margin-bottom: var(--sp-xl); }
+.dim-row { display: flex; flex-direction: column; gap: 5px; }
+.dim-header { display: flex; justify-content: space-between; align-items: baseline; }
+.dim-name { font-family: var(--ff-mono); font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--mid); }
+.dim-score-label { font-family: var(--ff-display); font-size: 12px; color: var(--mid); font-style: italic; }
+.dim-bar-bg { height: 1px; background: var(--faint); }
+.dim-bar-fill { height: 1px; background: var(--ink); transition: width 1.4s cubic-bezier(0.16,1,0.3,1); }
+.dim-desc { font-family: var(--ff-body); font-size: 11px; color: var(--mid); line-height: 1.75; margin-top: 3px; }
+
+.result-summary { border: 1px solid var(--faint); padding: var(--sp-xl); margin-bottom: var(--sp-lg); }
+.summary-label { font-family: var(--ff-mono); font-size: 9px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--mid); margin-bottom: var(--sp-md); }
+.summary-text { font-family: var(--ff-display); font-size: 14px; line-height: 1.85; }
+
+.result-actions { display: flex; gap: var(--sp-sm); margin-bottom: var(--sp-xl); flex-wrap: wrap; }
+.btn-action {
+  font-family: var(--ff-mono); font-size: 9px; letter-spacing: 0.2em;
+  text-transform: uppercase; border: 1px solid var(--faint); color: var(--mid);
+  padding: 9px 18px; transition: border-color 0.15s, color 0.15s;
+}
+.btn-action:hover { border-color: var(--ink); color: var(--ink); }
+
+.result-footer { font-family: var(--ff-mono); font-size: 9px; color: var(--faint); letter-spacing: 0.15em; text-align: center; line-height: 2.2; }
+.result-footer a { color: var(--faint); text-decoration: none; }
+
+/* TOAST */
+.toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--ink); color: var(--cream);
+  font-family: var(--ff-mono); font-size: 10px; letter-spacing: 0.15em;
+  padding: 11px 22px; transition: transform 0.3s ease;
+  pointer-events: none; z-index: 9999; white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* PRINT */
+@media print {
+  #screen-lang, #screen-intro, #screen-question, #screen-transition { display: none !important; }
+  #screen-result { display: block !important; }
+  .result-actions, .shared-banner { display: none !important; }
+  body { padding: 16px; background: white; background-image: none; }
+  body::after { display: none; }
+  #bg-particles { display: none; }
+}
+
+/* REDUCED MOTION */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
+}
 </style>
 </head>
 <body>
 
-<!-- LANG SELECT -->
-<div id="screen-lang" class="screen active fade-in">
-  <p class="sigil">Paper Tree Theory</p>
-  <h1>Tree Assessment</h1>
-  <p class="sub">ทฤษฎีต้นไม้กระดาษ · 2026</p>
+<canvas id="bg-particles"></canvas>
+
+<!-- LANG -->
+<div id="screen-lang" class="screen active">
+  <p class="lang-sigil">Paper Tree Theory</p>
+  <div class="lang-tree-icon">
+    <svg width="38" height="56" viewBox="0 0 38 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M19 56 L19 27" stroke="#181715" stroke-width="2" stroke-linecap="round"/>
+      <path d="M19 34 Q13 28 8 24" stroke="#181715" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+      <path d="M19 34 Q25 28 30 24" stroke="#181715" stroke-width="1.4" stroke-linecap="round" fill="none"/>
+      <path d="M8 24 Q5 19 4 14" stroke="#181715" stroke-width="1" stroke-linecap="round" fill="none"/>
+      <path d="M8 24 Q10 18 12 13" stroke="#181715" stroke-width="1" stroke-linecap="round" fill="none"/>
+      <path d="M30 24 Q28 18 26 13" stroke="#181715" stroke-width="1" stroke-linecap="round" fill="none"/>
+      <path d="M30 24 Q33 19 34 14" stroke="#181715" stroke-width="1" stroke-linecap="round" fill="none"/>
+      <path d="M19 30 Q14 24 11 19" stroke="#181715" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+      <path d="M19 30 Q24 24 27 19" stroke="#181715" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+      <path d="M17 56 Q12 59 8 57" stroke="#181715" stroke-width="1" stroke-linecap="round" fill="none"/>
+      <path d="M21 56 Q26 59 30 57" stroke="#181715" stroke-width="1" stroke-linecap="round" fill="none"/>
+    </svg>
+  </div>
+  <h1 class="lang-title">Tree Assessment</h1>
+  <p class="lang-sub">ทฤษฎีต้นไม้กระดาษ · 2026</p>
   <div class="lang-buttons">
     <button class="lang-btn" onclick="selectLang('th')">ภาษาไทย</button>
     <button class="lang-btn" onclick="selectLang('en')">English</button>
@@ -575,8 +411,9 @@
 
 <!-- INTRO -->
 <div id="screen-intro" class="screen">
-  <p class="intro-label" id="intro-label">Assessment</p>
+  <p class="intro-eyebrow" id="intro-label">Assessment</p>
   <h1 class="intro-title" id="intro-title"></h1>
+  <p class="intro-quote" id="intro-quote"></p>
   <div class="intro-body" id="intro-body"></div>
   <div class="intro-meta">
     <div class="meta-item" id="meta-questions"></div>
@@ -592,9 +429,7 @@
     <span class="q-dim" id="q-dim-label"></span>
     <span class="q-counter" id="q-counter"></span>
   </div>
-  <div class="q-progress-bar">
-    <div class="q-progress-fill" id="q-progress-fill"></div>
-  </div>
+  <div class="q-progress-bar"><div class="q-progress-fill" id="q-progress-fill"></div></div>
   <p class="q-text" id="q-text"></p>
   <p class="q-context" id="q-context"></p>
   <div id="q-input-area"></div>
@@ -607,16 +442,26 @@
   <p class="key-hint" id="key-hint"></p>
 </div>
 
-<!-- TRANSITION -->
+<!-- TRANSITION (fullscreen dark) -->
 <div id="screen-transition" class="screen">
-  <p class="tr-text" id="tr-text">Analyzing your tree...</p>
+  <div class="tr-figure">
+    <svg width="28" height="48" viewBox="0 0 28 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="14" cy="9" r="7.5" stroke="#f0ede5" stroke-width="1.4" fill="none"/>
+      <rect x="10" y="17" width="8" height="15" rx="0" stroke="#f0ede5" stroke-width="1.4" fill="none"/>
+      <line x1="10" y1="21" x2="4" y2="27" stroke="#f0ede5" stroke-width="1.4" stroke-linecap="round"/>
+      <line x1="18" y1="21" x2="24" y2="27" stroke="#f0ede5" stroke-width="1.4" stroke-linecap="round"/>
+      <line x1="12" y1="32" x2="10" y2="43" stroke="#f0ede5" stroke-width="1.4" stroke-linecap="round"/>
+      <line x1="16" y1="32" x2="18" y2="43" stroke="#f0ede5" stroke-width="1.4" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <p class="tr-text" id="tr-text"></p>
 </div>
 
 <!-- RESULT -->
 <div id="screen-result" class="screen">
   <div class="shared-banner" id="shared-banner"></div>
   <div class="result-header">
-    <p class="result-label" id="res-label">Your Tree</p>
+    <p class="result-eyebrow" id="res-label">Your Tree</p>
     <h2 class="result-title" id="res-title"></h2>
   </div>
   <div class="tree-canvas-wrap">
@@ -635,18 +480,18 @@
   <p class="result-footer" id="result-footer"></p>
 </div>
 
-<!-- Toast -->
 <div class="toast" id="toast"></div>
 
 <script>
 // ══════════════════════════════════════════════
-// COPY / i18n
+// i18n
 // ══════════════════════════════════════════════
 const COPY = {
   th: {
     introTitle: "คุณรู้จักต้นไม้ของตัวเองดีแค่ไหน",
-    introBody: `<p>Paper Tree Theory เป็นกรอบแนวคิดที่มองจิตใจว่าเป็นต้นไม้ — มีอยู่ก่อนประสบการณ์ เติบโตผ่านการตีความ และได้รับอิทธิพลจากคนรอบข้าง</p><p>แบบประเมินนี้วัด 6 มิติของต้นไม้คุณ ได้แก่ สุขภาพตัวตน รูปแบบการตีความ ความหนาแน่นของ core beliefs สภาวะภายใน ความไวต่ออิทธิพลจากภายนอก และการจัดการกับประสบการณ์ที่ผ่านไป</p><p>ไม่มีคำตอบที่ถูกหรือผิด ตอบตามที่เป็นจริง ไม่ใช่ตามที่คิดว่าควรเป็น</p>`,
-    metaQ: "คำถาม<span>18–22 ข้อ</span>",
+    introQuote: "จิตใจไม่ใช่กระดาษเปล่าแผ่นเดียว แต่เป็นพื้นที่กว้างใหญ่ไร้ขอบเขตที่มีต้นไม้มีชีวิตอยู่ตรงกลาง",
+    introBody: `<p>Paper Tree Theory เป็นกรอบแนวคิดที่มองจิตใจว่าเป็นต้นไม้ — มีอยู่ก่อนประสบการณ์ เติบโตผ่านการตีความ และได้รับอิทธิพลจากคนรอบข้าง</p><p>แบบประเมินนี้วัด 6 มิติของต้นไม้คุณ ไม่มีคำตอบที่ถูกหรือผิด ตอบตามที่เป็นจริง</p>`,
+    metaQ: "คำถาม<span>18 ข้อ</span>",
     metaT: "เวลาโดยประมาณ<span>10–15 นาที</span>",
     metaN: "หมายเหตุ<span>คำถามปรับตามคำตอบ</span>",
     btnStart: "เริ่มประเมิน",
@@ -656,10 +501,10 @@ const COPY = {
     btnSave: "บันทึก PDF",
     btnShare: "คัดลอกลิงก์",
     btnRestart: "ทำใหม่",
-    trText: "กำลังวิเคราะห์ต้นไม้ของคุณ...",
+    trText: "กำลังอ่านต้นไม้ของคุณ...",
     resLabel: "ต้นไม้ของคุณ",
     summaryLabel: "สรุปภาพรวม",
-    footer: "Paper Tree Theory · 2026 · ผลลัพธ์นี้เป็น snapshot ณ วันนี้ ต้นไม้เปลี่ยนแปลงได้เสมอ",
+    footer: "Paper Tree Theory · 2026\nframework โดย jinje · interface โดย Claude",
     dimNames: ["สุขภาพตัวตน","รูปแบบการตีความ","ความหนาแน่นของ Core Beliefs","สภาวะภายใน","ความไวต่ออิทธิพลภายนอก","การจัดการประสบการณ์เก่า"],
     keyHintScale: "กด 1–5 เพื่อเลือก · → ถัดไป · ← ก่อนหน้า",
     keyHintScenario: "กด A–D เพื่อเลือก · → ถัดไป · ← ก่อนหน้า",
@@ -670,8 +515,9 @@ const COPY = {
   },
   en: {
     introTitle: "How well do you know your own tree?",
-    introBody: `<p>Paper Tree Theory views the mind as a living tree — existing before experience, growing through interpretation, and shaped by those around it.</p><p>This assessment measures 6 dimensions of your tree: self-health, interpretive patterns, core belief density, internal weather, sensitivity to outside influence, and how you process what has passed.</p><p>There are no correct answers. Respond as you are, not as you think you should be.</p>`,
-    metaQ: "Questions<span>18–22 items</span>",
+    introQuote: "The mind is not a blank page. It is a vast, borderless space with a living tree at its center.",
+    introBody: `<p>Paper Tree Theory views the mind as a living tree — existing before experience, growing through interpretation, and shaped by those around it.</p><p>This assessment measures 6 dimensions of your tree. There are no correct answers. Respond as you are.</p>`,
+    metaQ: "Questions<span>18 items</span>",
     metaT: "Estimated time<span>10–15 minutes</span>",
     metaN: "Note<span>Questions adapt to your answers</span>",
     btnStart: "Begin Assessment",
@@ -681,10 +527,10 @@ const COPY = {
     btnSave: "Save as PDF",
     btnShare: "Copy Link",
     btnRestart: "Take Again",
-    trText: "Analyzing your tree...",
+    trText: "Reading your tree...",
     resLabel: "Your Tree",
     summaryLabel: "Overview",
-    footer: "Paper Tree Theory · 2026 · This result is a snapshot of today. Trees can always change.",
+    footer: "Paper Tree Theory · 2026\nframework by jinje · interface by Claude",
     dimNames: ["Self-Health","Interpretive Pattern","Core Belief Density","Internal Weather","Sensitivity to Outside Influence","Processing of Past Experience"],
     keyHintScale: "Press 1–5 to select · → next · ← back",
     keyHintScenario: "Press A–D to select · → next · ← back",
@@ -695,8 +541,9 @@ const COPY = {
   },
   ja: {
     introTitle: "あなたは自分の木をどれだけ知っていますか",
-    introBody: `<p>ペーパーツリー理論は、心を生きた木として捉えます — 経験より先に存在し、解釈を通じて成長し、周囲の人々に形作られます。</p><p>この評価では、あなたの木の6つの次元を測定します：自己の健康、解釈パターン、コアビリーフの密度、内的気象、外部からの影響への感受性、そして過去の経験の処理方法。</p><p>正しい答えはありません。あるべき姿ではなく、ありのままの自分として答えてください。</p>`,
-    metaQ: "質問数<span>18〜22問</span>",
+    introQuote: "心は一枚の白紙ではない。それは生きた木が中心に立つ、広大で境界のない空間だ。",
+    introBody: `<p>ペーパーツリー理論は、心を生きた木として捉えます — 経験より先に存在し、解釈を通じて成長し、周囲の人々に形作られます。</p><p>この評価では木の6つの次元を測定します。正しい答えはありません。</p>`,
+    metaQ: "質問数<span>18問</span>",
     metaT: "目安時間<span>10〜15分</span>",
     metaN: "注意<span>質問は回答に応じて変化します</span>",
     btnStart: "評価を開始",
@@ -706,10 +553,10 @@ const COPY = {
     btnSave: "PDFとして保存",
     btnShare: "リンクをコピー",
     btnRestart: "もう一度",
-    trText: "あなたの木を分析しています...",
+    trText: "あなたの木を読んでいます...",
     resLabel: "あなたの木",
     summaryLabel: "概要",
-    footer: "Paper Tree Theory · 2026 · この結果は今日のスナップショットです。木はいつでも変わることができます。",
+    footer: "Paper Tree Theory · 2026\nフレームワーク by jinje · インターフェース by Claude",
     dimNames: ["自己の健康","解釈パターン","コアビリーフの密度","内的気象","外部影響への感受性","過去の経験の処理"],
     keyHintScale: "1–5で選択 · →次へ · ←戻る",
     keyHintScenario: "A–Dで選択 · →次へ · ←戻る",
@@ -721,461 +568,68 @@ const COPY = {
 };
 
 // ══════════════════════════════════════════════
-// QUESTIONS
+// QUESTIONS (unchanged from v1)
 // ══════════════════════════════════════════════
 const QUESTIONS = {
   th: [
-    {
-      dim: "สุขภาพตัวตน", id: "th1", type: "scale",
-      text: "เมื่อเกิดเหตุการณ์ที่ไม่คาดคิดในชีวิต คุณรู้สึกว่าตัวเองฟื้นตัวได้เร็วแค่ไหน",
-      context: "ไม่ใช่ว่าคุณไม่กระทบ แต่หลังจากนั้นคุณกลับมาเป็นตัวเองได้ไหม",
-      scale: ["ฟื้นยากมาก", "ฟื้นได้เสมอ"],
-    },
-    {
-      dim: "สุขภาพตัวตน", id: "th2", type: "scenario",
-      text: "คุณได้รับคำวิจารณ์จากคนที่ไม่รู้จักคุณดีพอ เกี่ยวกับสิ่งที่คุณทำมานาน สิ่งที่เกิดขึ้นในหัวคุณคืออะไร",
-      context: "",
-      options: [
-        "รู้สึกสั่นคลอน ต้องใช้เวลาสักพักจึงกลับมาเชื่อในตัวเองได้",
-        "วิเคราะห์ว่าคำวิจารณ์นั้นมีน้ำหนักไหม แล้วตัดสินใจว่าจะรับหรือไม่",
-        "รับรู้ แต่ไม่ได้ให้น้ำหนักมาก เพราะตัวเองรู้ดีกว่าว่าทำอะไรอยู่",
-        "กังวลอยู่นาน แม้รู้ว่าคำวิจารณ์นั้นอาจไม่ถูกต้อง",
-      ],
-      scores: [2, 4, 4, 1],
-    },
-    {
-      dim: "สุขภาพตัวตน", id: "th3", type: "scale",
-      text: "คุณรู้สึกว่าตัวเองมีความชัดเจนในตัวตนมากแค่ไหน — ว่าคุณเป็นใคร ต้องการอะไร ยืนอยู่ตรงไหน",
-      context: "ไม่ได้ถามว่าคุณรู้จักตัวเองครบหมดหรือเปล่า แต่ถามว่ามีแกนกลางที่คุณรู้สึกชัดไหม",
-      scale: ["ไม่ชัดเจนเลย", "ชัดเจนมาก"],
-    },
-    {
-      dim: "รูปแบบการตีความ", id: "th4", type: "scenario",
-      text: "เพื่อนส่งข้อความมาสั้นๆ ว่า 'โอเค' หลังจากคุณอธิบายบางอย่างไปยาวมาก ความคิดแรกของคุณคืออะไร",
-      context: "",
-      options: [
-        "เขาคงไม่ได้อ่านจริงๆ หรือไม่สนใจ",
-        "แค่ตอบสั้น — น่าจะยุ่งหรือไม่รู้จะพูดอะไร",
-        "ต้องการถามให้ชัดขึ้นว่าเขาเข้าใจจริงๆ ไหม",
-        "รู้สึกขัดๆ แต่ไม่แน่ใจว่ามันหมายความว่าอะไร",
-      ],
-      scores: [2, 4, 3, 2],
-    },
-    {
-      dim: "รูปแบบการตีความ", id: "th5", type: "words",
-      text: "เลือกคำที่ตรงกับวิธีที่คุณมองประสบการณ์ใหม่โดยทั่วไป",
-      context: "เลือกได้มากกว่า 1 คำ",
-      words: ["วิเคราะห์","ระวัง","ตื่นเต้น","ตั้งคำถาม","รับ","กังวล","อยากรู้","ระมัดระวัง","เปิดรับ","สงสัย"],
-      positiveWords: ["วิเคราะห์","ตื่นเต้น","ตั้งคำถาม","อยากรู้","เปิดรับ"],
-    },
-    {
-      dim: "รูปแบบการตีความ", id: "th6", type: "scale",
-      text: "เมื่อคุณตีความเหตุการณ์อะไรไปแล้ว และทีหลังรู้ว่าตัวเองตีความผิด คุณเปลี่ยนความเข้าใจได้ง่ายแค่ไหน",
-      context: "",
-      scale: ["เปลี่ยนยากมาก", "เปลี่ยนได้ง่าย"],
-    },
-    {
-      dim: "ความหนาแน่นของ Core Beliefs", id: "th7", type: "words",
-      text: "เลือกประโยคที่คุณรู้สึกว่าตัวเองยึดไว้แน่น — จนยากที่จะจินตนาการว่าจะคิดตรงข้าม",
-      context: "เลือกทุกข้อที่รู้สึก 'ใช่' จริงๆ",
-      words: ["คนส่วนใหญ่มีเจตนาดี","ฉันต้องพึ่งตัวเองเท่านั้น","ความสำเร็จต้องแลกด้วยบางอย่างเสมอ","ถ้าทำดีแล้วผลลัพธ์จะดีตาม","บางอย่างเปลี่ยนไม่ได้","ฉันรู้ว่าตัวเองเป็นใคร","ความสัมพันธ์ต้องใช้แรงมากเสมอ","โลกนี้ยุติธรรมในแบบของมัน"],
-      positiveWords: [],
-      isFrame: true,
-    },
-    {
-      dim: "ความหนาแน่นของ Core Beliefs", id: "th8", type: "scenario",
-      text: "มีคนพูดบางอย่างที่ขัดกับสิ่งที่คุณเชื่อมาตลอด แต่เขาพูดด้วยเหตุผลที่ฟังดูน้ำหนัก คุณทำอะไร",
-      context: "",
-      options: [
-        "ฟังแต่รู้สึกว่ามันขัดกับที่รู้มาตลอด จึงไม่เปลี่ยนใจ",
-        "พิจารณาจริงๆ ว่าเหตุผลเขามีน้ำหนักพอที่จะทบทวนความเชื่อของตัวเองไหม",
-        "ยอมรับในระดับหนึ่ง แต่ยังยึดกับของเดิมในระดับที่ลึกกว่า",
-        "รู้สึกไม่สบายใจและอยากจบการสนทนา",
-      ],
-      scores: [2, 5, 3, 1],
-    },
-    {
-      dim: "ความหนาแน่นของ Core Beliefs", id: "th9", type: "text",
-      text: "มีความเชื่ออะไรสักอย่างที่คุณเคยยึดแน่น แต่ตอนนี้ไม่ได้เชื่อแบบนั้นแล้ว เกิดอะไรขึ้น",
-      context: "ตอบสั้นๆ ได้ เป็นแค่คำหรือประโยคก็ได้",
-      placeholder: "เขียนที่นี่...",
-    },
-    {
-      dim: "สภาวะภายใน", id: "th10", type: "scenario",
-      text: "ช่วงนี้ พื้นที่ข้างในคุณเป็นแบบไหนมากที่สุด",
-      context: "ไม่ใช่ว่าตลอดชีวิต แค่ช่วง 2–3 สัปดาห์ที่ผ่านมา",
-      options: [
-        "กระดาษร่วงมาก — เหตุการณ์เยอะ ประมวลผลไม่ทัน",
-        "เป็นระเบียบ — มีพื้นที่จัดการกับสิ่งที่เข้ามา",
-        "สงบนิ่ง — ไม่ได้ active มากนัก รู้สึกเฉยๆ",
-        "เปียกฝน — รู้สึกพร่าเลือน ตีความอะไรได้ยาก",
-      ],
-      scores: [2, 5, 3, 1],
-    },
-    {
-      dim: "สภาวะภายใน", id: "th11", type: "scale",
-      text: "คุณรู้สึกว่าตัวเองมีพลังงานในการ engage กับประสบการณ์ใหม่มากแค่ไหนในตอนนี้",
-      context: "",
-      scale: ["ไม่มีพลังเลย", "มีพลังเต็มที่"],
-    },
-    {
-      dim: "ความไวต่ออิทธิพลภายนอก", id: "th12", type: "scenario",
-      text: "คนที่คุณนับถือพูดว่า 'งานนั้นไม่ดีพอ' ก่อนที่คุณจะได้ตัดสินใจด้วยตัวเอง ผลที่เกิดขึ้นคืออะไร",
-      context: "",
-      options: [
-        "ความเห็นของเขากลายเป็นกรอบที่คุณมองงานนั้นอยู่นาน",
-        "รับรู้ แต่ยังหาคำตอบของตัวเองอยู่ดี",
-        "วิเคราะห์ว่าเขาพูดจากมุมไหน แล้วประเมินเองอีกรอบ",
-        "พยายามไม่รับ แต่มันก็ยังอยู่ในหัว",
-      ],
-      scores: [1, 4, 5, 2],
-    },
-    {
-      dim: "ความไวต่ออิทธิพลภายนอก", id: "th13", type: "scale",
-      text: "เมื่อคุณมีความคิดเห็นบางอย่าง แล้วคนส่วนใหญ่รอบข้างคิดตรงข้าม คุณยังยืนกับความเห็นของตัวเองได้ไหม",
-      context: "",
-      scale: ["ยืนได้ยากมาก", "ยืนได้เสมอ"],
-    },
-    {
-      dim: "ความไวต่ออิทธิพลภายนอก", id: "th14", type: "words",
-      text: "เลือกคนประเภทที่คุณรู้สึกว่ามีอิทธิพลต่อวิธีคิดของคุณมากที่สุด",
-      context: "เลือกได้หลายข้อ",
-      words: ["พ่อแม่","เพื่อนสนิท","คนที่คุณนับถือ","คนแปลกหน้าที่พูดน่าเชื่อ","อินเทอร์เน็ต","ตัวเองในอดีต","ไม่มีใครมีอิทธิพลมากพิเศษ"],
-      positiveWords: [],
-      isExternal: true,
-    },
-    {
-      dim: "การจัดการประสบการณ์เก่า", id: "th15", type: "scenario",
-      text: "ประสบการณ์เจ็บปวดในอดีตที่คุณไม่ได้นึกถึงนานแล้ว — มันอยู่ที่ไหนในคุณตอนนี้",
-      context: "",
-      options: [
-        "ถูก process และกลายเป็นส่วนหนึ่งของตัวเองโดยไม่รู้สึกแบกอยู่",
-        "รู้ว่ามันยังอยู่ข้างใน แต่ไม่ได้มีผลต่อชีวิตประจำวัน",
-        "ยังรู้สึกได้ว่ามันส่งผลต่อวิธีที่ตอบสนองต่อบางสิ่ง",
-        "ไม่แน่ใจ — ไม่รู้ว่ามันถูก process หรือแค่ถูกเก็บไว้",
-      ],
-      scores: [5, 4, 2, 2],
-    },
-    {
-      dim: "การจัดการประสบการณ์เก่า", id: "th16", type: "scale",
-      text: "คุณรู้สึกว่าตัวเองสามารถมองประสบการณ์เจ็บปวดในอดีตได้โดยไม่รู้สึกถูกมันดึงกลับไปมากแค่ไหน",
-      context: "",
-      scale: ["ถูกดึงกลับเสมอ", "มองได้จากระยะ"],
-    },
-    {
-      dim: "การจัดการประสบการณ์เก่า", id: "th17", type: "text",
-      text: "มีความทรงจำหรือช่วงเวลาไหนที่คุณรู้สึกว่ายังค้างอยู่ข้างใน ยังไม่ได้ถูก process จริงๆ",
-      context: "ไม่ต้องอธิบายละเอียด แค่รู้จักมันก็พอ",
-      placeholder: "เขียนที่นี่ หรือปล่อยว่างก็ได้...",
-    },
-    {
-      dim: "สุขภาพตัวตน", id: "th18", type: "scale",
-      text: "โดยรวมแล้ว คุณรู้สึกว่าต้นไม้ของคุณอยู่ในสภาพไหน",
-      context: "ไม่ใช่คำถามหลอก — ความรู้สึกของตัวเองมีน้ำหนักในการวัดนี้",
-      scale: ["อ่อนแอ สั่นคลอน", "แข็งแรง มั่นคง"],
-    },
+    { dim:"สุขภาพตัวตน", id:"th1", type:"scale", text:"เมื่อเกิดเหตุการณ์ที่ไม่คาดคิดในชีวิต คุณรู้สึกว่าตัวเองฟื้นตัวได้เร็วแค่ไหน", context:"ไม่ใช่ว่าคุณไม่กระทบ แต่หลังจากนั้นคุณกลับมาเป็นตัวเองได้ไหม", scale:["ฟื้นยากมาก","ฟื้นได้เสมอ"] },
+    { dim:"สุขภาพตัวตน", id:"th2", type:"scenario", text:"คุณได้รับคำวิจารณ์จากคนที่ไม่รู้จักคุณดีพอ เกี่ยวกับสิ่งที่คุณทำมานาน สิ่งที่เกิดขึ้นในหัวคุณคืออะไร", context:"", options:["รู้สึกสั่นคลอน ต้องใช้เวลาสักพักจึงกลับมาเชื่อในตัวเองได้","วิเคราะห์ว่าคำวิจารณ์นั้นมีน้ำหนักไหม แล้วตัดสินใจว่าจะรับหรือไม่","รับรู้ แต่ไม่ได้ให้น้ำหนักมาก เพราะตัวเองรู้ดีกว่าว่าทำอะไรอยู่","กังวลอยู่นาน แม้รู้ว่าคำวิจารณ์นั้นอาจไม่ถูกต้อง"], scores:[2,4,4,1] },
+    { dim:"สุขภาพตัวตน", id:"th3", type:"scale", text:"คุณรู้สึกว่าตัวเองมีความชัดเจนในตัวตนมากแค่ไหน — ว่าคุณเป็นใคร ต้องการอะไร ยืนอยู่ตรงไหน", context:"ไม่ได้ถามว่าคุณรู้จักตัวเองครบหมดหรือเปล่า แต่ถามว่ามีแกนกลางที่คุณรู้สึกชัดไหม", scale:["ไม่ชัดเจนเลย","ชัดเจนมาก"] },
+    { dim:"รูปแบบการตีความ", id:"th4", type:"scenario", text:"เพื่อนส่งข้อความมาสั้นๆ ว่า 'โอเค' หลังจากคุณอธิบายบางอย่างไปยาวมาก ความคิดแรกของคุณคืออะไร", context:"", options:["เขาคงไม่ได้อ่านจริงๆ หรือไม่สนใจ","แค่ตอบสั้น — น่าจะยุ่งหรือไม่รู้จะพูดอะไร","ต้องการถามให้ชัดขึ้นว่าเขาเข้าใจจริงๆ ไหม","รู้สึกขัดๆ แต่ไม่แน่ใจว่ามันหมายความว่าอะไร"], scores:[2,4,3,2] },
+    { dim:"รูปแบบการตีความ", id:"th5", type:"words", text:"เลือกคำที่ตรงกับวิธีที่คุณมองประสบการณ์ใหม่โดยทั่วไป", context:"เลือกได้มากกว่า 1 คำ", words:["วิเคราะห์","ระวัง","ตื่นเต้น","ตั้งคำถาม","รับ","กังวล","อยากรู้","ระมัดระวัง","เปิดรับ","สงสัย"], positiveWords:["วิเคราะห์","ตื่นเต้น","ตั้งคำถาม","อยากรู้","เปิดรับ"] },
+    { dim:"รูปแบบการตีความ", id:"th6", type:"scale", text:"เมื่อคุณตีความเหตุการณ์อะไรไปแล้ว และทีหลังรู้ว่าตัวเองตีความผิด คุณเปลี่ยนความเข้าใจได้ง่ายแค่ไหน", context:"", scale:["เปลี่ยนยากมาก","เปลี่ยนได้ง่าย"] },
+    { dim:"ความหนาแน่นของ Core Beliefs", id:"th7", type:"words", text:"เลือกประโยคที่คุณรู้สึกว่าตัวเองยึดไว้แน่น — จนยากที่จะจินตนาการว่าจะคิดตรงข้าม", context:"เลือกทุกข้อที่รู้สึก 'ใช่' จริงๆ", words:["คนส่วนใหญ่มีเจตนาดี","ฉันต้องพึ่งตัวเองเท่านั้น","ความสำเร็จต้องแลกด้วยบางอย่างเสมอ","ถ้าทำดีแล้วผลลัพธ์จะดีตาม","บางอย่างเปลี่ยนไม่ได้","ฉันรู้ว่าตัวเองเป็นใคร","ความสัมพันธ์ต้องใช้แรงมากเสมอ","โลกนี้ยุติธรรมในแบบของมัน"], positiveWords:[], isFrame:true },
+    { dim:"ความหนาแน่นของ Core Beliefs", id:"th8", type:"scenario", text:"มีคนพูดบางอย่างที่ขัดกับสิ่งที่คุณเชื่อมาตลอด แต่เขาพูดด้วยเหตุผลที่ฟังดูน้ำหนัก คุณทำอะไร", context:"", options:["ฟังแต่รู้สึกว่ามันขัดกับที่รู้มาตลอด จึงไม่เปลี่ยนใจ","พิจารณาจริงๆ ว่าเหตุผลเขามีน้ำหนักพอที่จะทบทวนความเชื่อของตัวเองไหม","ยอมรับในระดับหนึ่ง แต่ยังยึดกับของเดิมในระดับที่ลึกกว่า","รู้สึกไม่สบายใจและอยากจบการสนทนา"], scores:[2,5,3,1] },
+    { dim:"ความหนาแน่นของ Core Beliefs", id:"th9", type:"text", text:"มีความเชื่ออะไรสักอย่างที่คุณเคยยึดแน่น แต่ตอนนี้ไม่ได้เชื่อแบบนั้นแล้ว เกิดอะไรขึ้น", context:"ตอบสั้นๆ ได้ เป็นแค่คำหรือประโยคก็ได้", placeholder:"เขียนที่นี่..." },
+    { dim:"สภาวะภายใน", id:"th10", type:"scenario", text:"ช่วงนี้ พื้นที่ข้างในคุณเป็นแบบไหนมากที่สุด", context:"ไม่ใช่ว่าตลอดชีวิต แค่ช่วง 2–3 สัปดาห์ที่ผ่านมา", options:["กระดาษร่วงมาก — เหตุการณ์เยอะ ประมวลผลไม่ทัน","เป็นระเบียบ — มีพื้นที่จัดการกับสิ่งที่เข้ามา","สงบนิ่ง — ไม่ได้ active มากนัก รู้สึกเฉยๆ","เปียกฝน — รู้สึกพร่าเลือน ตีความอะไรได้ยาก"], scores:[2,5,3,1] },
+    { dim:"สภาวะภายใน", id:"th11", type:"scale", text:"คุณรู้สึกว่าตัวเองมีพลังงานในการ engage กับประสบการณ์ใหม่มากแค่ไหนในตอนนี้", context:"", scale:["ไม่มีพลังเลย","มีพลังเต็มที่"] },
+    { dim:"ความไวต่ออิทธิพลภายนอก", id:"th12", type:"scenario", text:"คนที่คุณนับถือพูดว่า 'งานนั้นไม่ดีพอ' ก่อนที่คุณจะได้ตัดสินใจด้วยตัวเอง ผลที่เกิดขึ้นคืออะไร", context:"", options:["ความเห็นของเขากลายเป็นกรอบที่คุณมองงานนั้นอยู่นาน","รับรู้ แต่ยังหาคำตอบของตัวเองอยู่ดี","วิเคราะห์ว่าเขาพูดจากมุมไหน แล้วประเมินเองอีกรอบ","พยายามไม่รับ แต่มันก็ยังอยู่ในหัว"], scores:[1,4,5,2] },
+    { dim:"ความไวต่ออิทธิพลภายนอก", id:"th13", type:"scale", text:"เมื่อคุณมีความคิดเห็นบางอย่าง แล้วคนส่วนใหญ่รอบข้างคิดตรงข้าม คุณยังยืนกับความเห็นของตัวเองได้ไหม", context:"", scale:["ยืนได้ยากมาก","ยืนได้เสมอ"] },
+    { dim:"ความไวต่ออิทธิพลภายนอก", id:"th14", type:"words", text:"เลือกคนประเภทที่คุณรู้สึกว่ามีอิทธิพลต่อวิธีคิดของคุณมากที่สุด", context:"เลือกได้หลายข้อ", words:["พ่อแม่","เพื่อนสนิท","คนที่คุณนับถือ","คนแปลกหน้าที่พูดน่าเชื่อ","อินเทอร์เน็ต","ตัวเองในอดีต","ไม่มีใครมีอิทธิพลมากพิเศษ"], positiveWords:[], isExternal:true },
+    { dim:"การจัดการประสบการณ์เก่า", id:"th15", type:"scenario", text:"ประสบการณ์เจ็บปวดในอดีตที่คุณไม่ได้นึกถึงนานแล้ว — มันอยู่ที่ไหนในคุณตอนนี้", context:"", options:["ถูก process และกลายเป็นส่วนหนึ่งของตัวเองโดยไม่รู้สึกแบกอยู่","รู้ว่ามันยังอยู่ข้างใน แต่ไม่ได้มีผลต่อชีวิตประจำวัน","ยังรู้สึกได้ว่ามันส่งผลต่อวิธีที่ตอบสนองต่อบางสิ่ง","ไม่แน่ใจ — ไม่รู้ว่ามันถูก process หรือแค่ถูกเก็บไว้"], scores:[5,4,2,2] },
+    { dim:"การจัดการประสบการณ์เก่า", id:"th16", type:"scale", text:"คุณรู้สึกว่าตัวเองสามารถมองประสบการณ์เจ็บปวดในอดีตได้โดยไม่รู้สึกถูกมันดึงกลับไปมากแค่ไหน", context:"", scale:["ถูกดึงกลับเสมอ","มองได้จากระยะ"] },
+    { dim:"การจัดการประสบการณ์เก่า", id:"th17", type:"text", text:"มีความทรงจำหรือช่วงเวลาไหนที่คุณรู้สึกว่ายังค้างอยู่ข้างใน ยังไม่ได้ถูก process จริงๆ", context:"ไม่ต้องอธิบายละเอียด แค่รู้จักมันก็พอ", placeholder:"เขียนที่นี่ หรือปล่อยว่างก็ได้..." },
+    { dim:"สุขภาพตัวตน", id:"th18", type:"scale", text:"โดยรวมแล้ว คุณรู้สึกว่าต้นไม้ของคุณอยู่ในสภาพไหน", context:"ไม่ใช่คำถามหลอก — ความรู้สึกของตัวเองมีน้ำหนักในการวัดนี้", scale:["อ่อนแอ สั่นคลอน","แข็งแรง มั่นคง"] },
   ],
   en: [
-    {
-      dim: "Self-Health", id: "en1", type: "scale",
-      text: "When something unexpected disrupts your life, how quickly do you find your way back to yourself?",
-      context: "Not whether you're affected — but whether you recover.",
-      scale: ["Very difficult", "Always recover"],
-    },
-    {
-      dim: "Self-Health", id: "en2", type: "scenario",
-      text: "Someone who doesn't know your work well criticizes something you've built for a long time. What happens inside you?",
-      context: "",
-      options: [
-        "I feel shaken and need time to regain confidence in what I'm doing.",
-        "I analyze whether the criticism has merit, then decide whether to accept it.",
-        "I acknowledge it, but don't give it much weight — I know what I'm doing better than they do.",
-        "I keep worrying, even when I suspect the criticism might be off-base.",
-      ],
-      scores: [2, 4, 4, 1],
-    },
-    {
-      dim: "Self-Health", id: "en3", type: "scale",
-      text: "How clear is your sense of who you are — what you want, what you stand for?",
-      context: "Not whether you know everything about yourself, but whether there's a core you can feel.",
-      scale: ["Not clear at all", "Very clear"],
-    },
-    {
-      dim: "Interpretive Pattern", id: "en4", type: "scenario",
-      text: "A friend responds 'ok' after you've explained something at length. What's your first thought?",
-      context: "",
-      options: [
-        "They didn't really read it, or they don't care.",
-        "They're probably just busy or didn't know what to say.",
-        "I'd want to check whether they actually understood.",
-        "Something feels off, but I'm not sure what it means.",
-      ],
-      scores: [2, 4, 3, 2],
-    },
-    {
-      dim: "Interpretive Pattern", id: "en5", type: "words",
-      text: "Choose the words that match how you generally approach new experiences.",
-      context: "Select all that feel true.",
-      words: ["Analyze","Cautious","Curious","Question","Absorb","Anxious","Interested","Careful","Open","Skeptical"],
-      positiveWords: ["Analyze","Curious","Question","Interested","Open"],
-    },
-    {
-      dim: "Interpretive Pattern", id: "en6", type: "scale",
-      text: "When you've interpreted a situation and later learn you were wrong, how easily do you update your understanding?",
-      context: "",
-      scale: ["Very difficult", "Easy to update"],
-    },
-    {
-      dim: "Core Belief Density", id: "en7", type: "words",
-      text: "Select any beliefs you hold so firmly that imagining the opposite feels almost impossible.",
-      context: "Choose only what genuinely feels that way.",
-      words: ["People are mostly well-intentioned","I can only rely on myself","Success always requires sacrifice","Good effort leads to good outcomes","Some things can't change","I know who I am","Relationships always take hard work","The world is fair in its own way"],
-      positiveWords: [],
-      isFrame: true,
-    },
-    {
-      dim: "Core Belief Density", id: "en8", type: "scenario",
-      text: "Someone makes an argument that contradicts a long-held belief of yours — and it's a good argument. What do you do?",
-      context: "",
-      options: [
-        "I listen, but it doesn't feel right compared to what I've always known.",
-        "I genuinely consider whether their reasoning is strong enough to make me reconsider.",
-        "I partially accept it on the surface, but still hold the original belief underneath.",
-        "I feel uncomfortable and want to end the conversation.",
-      ],
-      scores: [2, 5, 3, 1],
-    },
-    {
-      dim: "Core Belief Density", id: "en9", type: "text",
-      text: "Name a belief you once held firmly that you no longer hold. What happened?",
-      context: "A word or sentence is enough.",
-      placeholder: "Write here...",
-    },
-    {
-      dim: "Internal Weather", id: "en10", type: "scenario",
-      text: "Which best describes your inner space right now?",
-      context: "Not your whole life — just the last 2–3 weeks.",
-      options: [
-        "Papers falling fast — a lot happening, hard to keep up.",
-        "Ordered — I have room to process what comes in.",
-        "Dormant — not much active processing, feeling still.",
-        "Rained on — things feel blurred, meaning is hard to hold.",
-      ],
-      scores: [2, 5, 3, 1],
-    },
-    {
-      dim: "Internal Weather", id: "en11", type: "scale",
-      text: "How much energy do you have right now to engage with new experiences?",
-      context: "",
-      scale: ["None at all", "Fully energized"],
-    },
-    {
-      dim: "Sensitivity to Outside Influence", id: "en12", type: "scenario",
-      text: "Someone you respect says 'that's not good enough' before you've had a chance to judge it yourself. What happens?",
-      context: "",
-      options: [
-        "Their view becomes the lens I keep using to see that thing.",
-        "I take it in, but continue forming my own judgment.",
-        "I analyze what angle they're coming from, then re-evaluate independently.",
-        "I try not to let it in, but it stays in my head anyway.",
-      ],
-      scores: [1, 4, 5, 2],
-    },
-    {
-      dim: "Sensitivity to Outside Influence", id: "en13", type: "scale",
-      text: "When you hold an opinion and most people around you think the opposite, how well can you maintain your own view?",
-      context: "",
-      scale: ["Very hard to hold", "Always hold firm"],
-    },
-    {
-      dim: "Sensitivity to Outside Influence", id: "en14", type: "words",
-      text: "Choose the types of people who most shape how you think.",
-      context: "Select all that apply.",
-      words: ["Parents","Close friends","People I admire","Strangers who sound convincing","The internet","My past self","No one has particular influence"],
-      positiveWords: [],
-      isExternal: true,
-    },
-    {
-      dim: "Processing of Past Experience", id: "en15", type: "scenario",
-      text: "A painful experience from your past that you haven't thought about in a long time — where does it live in you now?",
-      context: "",
-      options: [
-        "It's been processed and become part of me — I don't feel like I'm carrying it.",
-        "I know it's still in there, but it doesn't affect daily life.",
-        "I can still feel it shaping how I respond to certain things.",
-        "I'm not sure — I don't know if it's been processed or just stored.",
-      ],
-      scores: [5, 4, 2, 2],
-    },
-    {
-      dim: "Processing of Past Experience", id: "en16", type: "scale",
-      text: "How well can you look at painful past experiences without being pulled back into them?",
-      context: "",
-      scale: ["Always pulled back", "See from distance"],
-    },
-    {
-      dim: "Processing of Past Experience", id: "en17", type: "text",
-      text: "Is there a memory or period you feel is still unprocessed — still waiting inside you?",
-      context: "You don't need to explain it. Just acknowledging it is enough.",
-      placeholder: "Write here, or leave it blank...",
-    },
-    {
-      dim: "Self-Health", id: "en18", type: "scale",
-      text: "Overall, how would you describe the condition of your tree right now?",
-      context: "This isn't a trick question — your own felt sense carries real weight here.",
-      scale: ["Fragile, unsteady", "Strong, rooted"],
-    },
+    { dim:"Self-Health", id:"en1", type:"scale", text:"When something unexpected disrupts your life, how quickly do you find your way back to yourself?", context:"Not whether you're affected — but whether you recover.", scale:["Very difficult","Always recover"] },
+    { dim:"Self-Health", id:"en2", type:"scenario", text:"Someone who doesn't know your work well criticizes something you've built for a long time. What happens inside you?", context:"", options:["I feel shaken and need time to regain confidence in what I'm doing.","I analyze whether the criticism has merit, then decide whether to accept it.","I acknowledge it, but don't give it much weight — I know what I'm doing better than they do.","I keep worrying, even when I suspect the criticism might be off-base."], scores:[2,4,4,1] },
+    { dim:"Self-Health", id:"en3", type:"scale", text:"How clear is your sense of who you are — what you want, what you stand for?", context:"Not whether you know everything about yourself, but whether there's a core you can feel.", scale:["Not clear at all","Very clear"] },
+    { dim:"Interpretive Pattern", id:"en4", type:"scenario", text:"A friend responds 'ok' after you've explained something at length. What's your first thought?", context:"", options:["They didn't really read it, or they don't care.","They're probably just busy or didn't know what to say.","I'd want to check whether they actually understood.","Something feels off, but I'm not sure what it means."], scores:[2,4,3,2] },
+    { dim:"Interpretive Pattern", id:"en5", type:"words", text:"Choose the words that match how you generally approach new experiences.", context:"Select all that feel true.", words:["Analyze","Cautious","Curious","Question","Absorb","Anxious","Interested","Careful","Open","Skeptical"], positiveWords:["Analyze","Curious","Question","Interested","Open"] },
+    { dim:"Interpretive Pattern", id:"en6", type:"scale", text:"When you've interpreted a situation and later learn you were wrong, how easily do you update your understanding?", context:"", scale:["Very difficult","Easy to update"] },
+    { dim:"Core Belief Density", id:"en7", type:"words", text:"Select any beliefs you hold so firmly that imagining the opposite feels almost impossible.", context:"Choose only what genuinely feels that way.", words:["People are mostly well-intentioned","I can only rely on myself","Success always requires sacrifice","Good effort leads to good outcomes","Some things can't change","I know who I am","Relationships always take hard work","The world is fair in its own way"], positiveWords:[], isFrame:true },
+    { dim:"Core Belief Density", id:"en8", type:"scenario", text:"Someone makes an argument that contradicts a long-held belief of yours — and it's a good argument. What do you do?", context:"", options:["I listen, but it doesn't feel right compared to what I've always known.","I genuinely consider whether their reasoning is strong enough to make me reconsider.","I partially accept it on the surface, but still hold the original belief underneath.","I feel uncomfortable and want to end the conversation."], scores:[2,5,3,1] },
+    { dim:"Core Belief Density", id:"en9", type:"text", text:"Name a belief you once held firmly that you no longer hold. What happened?", context:"A word or sentence is enough.", placeholder:"Write here..." },
+    { dim:"Internal Weather", id:"en10", type:"scenario", text:"Which best describes your inner space right now?", context:"Not your whole life — just the last 2–3 weeks.", options:["Papers falling fast — a lot happening, hard to keep up.","Ordered — I have room to process what comes in.","Dormant — not much active processing, feeling still.","Rained on — things feel blurred, meaning is hard to hold."], scores:[2,5,3,1] },
+    { dim:"Internal Weather", id:"en11", type:"scale", text:"How much energy do you have right now to engage with new experiences?", context:"", scale:["None at all","Fully energized"] },
+    { dim:"Sensitivity to Outside Influence", id:"en12", type:"scenario", text:"Someone you respect says 'that's not good enough' before you've had a chance to judge it yourself. What happens?", context:"", options:["Their view becomes the lens I keep using to see that thing.","I take it in, but continue forming my own judgment.","I analyze what angle they're coming from, then re-evaluate independently.","I try not to let it in, but it stays in my head anyway."], scores:[1,4,5,2] },
+    { dim:"Sensitivity to Outside Influence", id:"en13", type:"scale", text:"When you hold an opinion and most people around you think the opposite, how well can you maintain your own view?", context:"", scale:["Very hard to hold","Always hold firm"] },
+    { dim:"Sensitivity to Outside Influence", id:"en14", type:"words", text:"Choose the types of people who most shape how you think.", context:"Select all that apply.", words:["Parents","Close friends","People I admire","Strangers who sound convincing","The internet","My past self","No one has particular influence"], positiveWords:[], isExternal:true },
+    { dim:"Processing of Past Experience", id:"en15", type:"scenario", text:"A painful experience from your past that you haven't thought about in a long time — where does it live in you now?", context:"", options:["It's been processed and become part of me — I don't feel like I'm carrying it.","I know it's still in there, but it doesn't affect daily life.","I can still feel it shaping how I respond to certain things.","I'm not sure — I don't know if it's been processed or just stored."], scores:[5,4,2,2] },
+    { dim:"Processing of Past Experience", id:"en16", type:"scale", text:"How well can you look at painful past experiences without being pulled back into them?", context:"", scale:["Always pulled back","See from distance"] },
+    { dim:"Processing of Past Experience", id:"en17", type:"text", text:"Is there a memory or period you feel is still unprocessed — still waiting inside you?", context:"You don't need to explain it. Just acknowledging it is enough.", placeholder:"Write here, or leave it blank..." },
+    { dim:"Self-Health", id:"en18", type:"scale", text:"Overall, how would you describe the condition of your tree right now?", context:"This isn't a trick question — your own felt sense carries real weight here.", scale:["Fragile, unsteady","Strong, rooted"] },
   ],
   ja: [
-    {
-      dim: "自己の健康", id: "ja1", type: "scale",
-      text: "予期しないことが起きたとき、あなたはどのくらい早く自分を取り戻せますか？",
-      context: "影響を受けるかどうかではなく、その後に回復できるかどうかです。",
-      scale: ["とても難しい", "いつでも回復できる"],
-    },
-    {
-      dim: "自己の健康", id: "ja2", type: "scenario",
-      text: "あなたの仕事をよく知らない人が、長い時間をかけて作ったものを批判しました。あなたの内側では何が起きますか？",
-      context: "",
-      options: [
-        "動揺し、自分への信頼を取り戻すのに時間がかかる。",
-        "批判に根拠があるかを分析し、受け入れるかどうか自分で判断する。",
-        "認識するが、自分の方がよくわかっていると感じてあまり重く受け取らない。",
-        "根拠がないかもしれないとわかっていても、長い間気になり続ける。",
-      ],
-      scores: [2, 4, 4, 1],
-    },
-    {
-      dim: "自己の健康", id: "ja3", type: "scale",
-      text: "自分が何者で、何を望み、どこに立っているか——その感覚はどれくらい明確ですか？",
-      context: "すべてを知っているかどうかではなく、感じられる核があるかどうかです。",
-      scale: ["全く明確でない", "とても明確"],
-    },
-    {
-      dim: "解釈パターン", id: "ja4", type: "scenario",
-      text: "長い説明の後、友人から「了解」とだけ返ってきました。最初に思ったことは何ですか？",
-      context: "",
-      options: [
-        "ちゃんと読んでいないか、興味がないのだろう。",
-        "ただ忙しいか、何と言えばいいかわからなかっただけだろう。",
-        "本当に理解しているか確認したい。",
-        "何か引っかかるが、何を意味するのかわからない。",
-      ],
-      scores: [2, 4, 3, 2],
-    },
-    {
-      dim: "解釈パターン", id: "ja5", type: "words",
-      text: "新しい経験に対する自分のアプローチを表す言葉を選んでください。",
-      context: "当てはまるものをすべて選んでください。",
-      words: ["分析する","慎重","好奇心旺盛","疑問を持つ","受け入れる","不安","興味深い","注意深い","オープン","懐疑的"],
-      positiveWords: ["分析する","好奇心旺盛","疑問を持つ","興味深い","オープン"],
-    },
-    {
-      dim: "解釈パターン", id: "ja6", type: "scale",
-      text: "ある状況を解釈した後、自分が間違っていたとわかったとき、どれくらい簡単に理解を更新できますか？",
-      context: "",
-      scale: ["とても難しい", "簡単に更新できる"],
-    },
-    {
-      dim: "コアビリーフの密度", id: "ja7", type: "words",
-      text: "逆のことを想像するのがほぼ不可能なほど、固く信じていることを選んでください。",
-      context: "本当にそう感じるものだけを選んでください。",
-      words: ["ほとんどの人は善意がある","自分だけを頼りにするしかない","成功には常に代償が伴う","良い努力は良い結果につながる","変えられないものがある","自分が何者かわかっている","人間関係は常に努力が必要","世界はそれなりに公平だ"],
-      positiveWords: [],
-      isFrame: true,
-    },
-    {
-      dim: "コアビリーフの密度", id: "ja8", type: "scenario",
-      text: "長年の信念に反する、説得力のある主張をされました。あなたはどうしますか？",
-      context: "",
-      options: [
-        "聞くが、これまで知ってきたことと違うので気持ちが変わらない。",
-        "その論理が自分の信念を見直すのに十分かどうか、本当に考える。",
-        "表面的には部分的に受け入れるが、深いところでは元の信念を保つ。",
-        "不快に感じ、話を終わらせたくなる。",
-      ],
-      scores: [2, 5, 3, 1],
-    },
-    {
-      dim: "コアビリーフの密度", id: "ja9", type: "text",
-      text: "かつて固く信じていたが、今はそう思わなくなったことを教えてください。何があったのですか？",
-      context: "一言か一文で十分です。",
-      placeholder: "ここに書いてください...",
-    },
-    {
-      dim: "内的気象", id: "ja10", type: "scenario",
-      text: "今の自分の内的空間はどれに一番近いですか？",
-      context: "人生全体ではなく、ここ2〜3週間のことです。",
-      options: [
-        "紙がたくさん落ちている——できごとが多く、処理しきれない。",
-        "整理されている——入ってくるものを処理する余裕がある。",
-        "静止している——あまりアクティブでなく、静かな感じ。",
-        "雨に濡れている——物事がぼやけて、意味をつかみにくい。",
-      ],
-      scores: [2, 5, 3, 1],
-    },
-    {
-      dim: "内的気象", id: "ja11", type: "scale",
-      text: "今、新しい経験に向き合うエネルギーはどのくらいありますか？",
-      context: "",
-      scale: ["全くない", "十分にある"],
-    },
-    {
-      dim: "外部影響への感受性", id: "ja12", type: "scenario",
-      text: "尊敬する人が、あなた自身が判断する前に「それは十分ではない」と言いました。何が起きますか？",
-      context: "",
-      options: [
-        "その人の見方が、そのものを見るレンズになってしまう。",
-        "受け取りつつも、自分の判断を続ける。",
-        "どの角度から言っているかを分析し、独立して再評価する。",
-        "受け入れないようにしようとするが、それでも頭に残る。",
-      ],
-      scores: [1, 4, 5, 2],
-    },
-    {
-      dim: "外部影響への感受性", id: "ja13", type: "scale",
-      text: "自分の意見を持っていて、周囲のほとんどが反対意見のとき、自分の見方を保てますか？",
-      context: "",
-      scale: ["とても難しい", "いつでも保てる"],
-    },
-    {
-      dim: "外部影響への感受性", id: "ja14", type: "words",
-      text: "あなたの考え方に最も影響を与える人のタイプを選んでください。",
-      context: "当てはまるものをすべて選んでください。",
-      words: ["親","親しい友人","尊敬する人","説得力のある見知らぬ人","インターネット","過去の自分","特に影響を受ける人はいない"],
-      positiveWords: [],
-      isExternal: true,
-    },
-    {
-      dim: "過去の経験の処理", id: "ja15", type: "scenario",
-      text: "長い間考えていなかった過去の辛い経験——今のあなたの中でそれはどこにありますか？",
-      context: "",
-      options: [
-        "処理されて自分の一部になっており、抱えている感覚はない。",
-        "まだ内側にあるとわかるが、日常生活には影響していない。",
-        "特定のことへの反応に影響していると感じることがある。",
-        "わからない——処理されたのか、ただ保存されているだけなのか。",
-      ],
-      scores: [5, 4, 2, 2],
-    },
-    {
-      dim: "過去の経験の処理", id: "ja16", type: "scale",
-      text: "過去の辛い経験を、引き戻されることなく見られますか？",
-      context: "",
-      scale: ["常に引き戻される", "距離を置いて見られる"],
-    },
-    {
-      dim: "過去の経験の処理", id: "ja17", type: "text",
-      text: "まだ処理されていない、内側で待っている記憶や時期はありますか？",
-      context: "説明しなくて大丈夫です。認識するだけで十分です。",
-      placeholder: "ここに書いてください。空白でも構いません...",
-    },
-    {
-      dim: "自己の健康", id: "ja18", type: "scale",
-      text: "全体的に、今のあなたの木の状態はどうですか？",
-      context: "これはひっかけ問題ではありません——自分自身の感覚が重要です。",
-      scale: ["弱く、不安定", "強く、根付いている"],
-    },
+    { dim:"自己の健康", id:"ja1", type:"scale", text:"予期しないことが起きたとき、あなたはどのくらい早く自分を取り戻せますか？", context:"影響を受けるかどうかではなく、その後に回復できるかどうかです。", scale:["とても難しい","いつでも回復できる"] },
+    { dim:"自己の健康", id:"ja2", type:"scenario", text:"あなたの仕事をよく知らない人が、長い時間をかけて作ったものを批判しました。あなたの内側では何が起きますか？", context:"", options:["動揺し、自分への信頼を取り戻すのに時間がかかる。","批判に根拠があるかを分析し、受け入れるかどうか自分で判断する。","認識するが、自分の方がよくわかっていると感じてあまり重く受け取らない。","根拠がないかもしれないとわかっていても、長い間気になり続ける。"], scores:[2,4,4,1] },
+    { dim:"自己の健康", id:"ja3", type:"scale", text:"自分が何者で、何を望み、どこに立っているか——その感覚はどれくらい明確ですか？", context:"すべてを知っているかどうかではなく、感じられる核があるかどうかです。", scale:["全く明確でない","とても明確"] },
+    { dim:"解釈パターン", id:"ja4", type:"scenario", text:"長い説明の後、友人から「了解」とだけ返ってきました。最初に思ったことは何ですか？", context:"", options:["ちゃんと読んでいないか、興味がないのだろう。","ただ忙しいか、何と言えばいいかわからなかっただけだろう。","本当に理解しているか確認したい。","何か引っかかるが、何を意味するのかわからない。"], scores:[2,4,3,2] },
+    { dim:"解釈パターン", id:"ja5", type:"words", text:"新しい経験に対する自分のアプローチを表す言葉を選んでください。", context:"当てはまるものをすべて選んでください。", words:["分析する","慎重","好奇心旺盛","疑問を持つ","受け入れる","不安","興味深い","注意深い","オープン","懐疑的"], positiveWords:["分析する","好奇心旺盛","疑問を持つ","興味深い","オープン"] },
+    { dim:"解釈パターン", id:"ja6", type:"scale", text:"ある状況を解釈した後、自分が間違っていたとわかったとき、どれくらい簡単に理解を更新できますか？", context:"", scale:["とても難しい","簡単に更新できる"] },
+    { dim:"コアビリーフの密度", id:"ja7", type:"words", text:"逆のことを想像するのがほぼ不可能なほど、固く信じていることを選んでください。", context:"本当にそう感じるものだけを選んでください。", words:["ほとんどの人は善意がある","自分だけを頼りにするしかない","成功には常に代償が伴う","良い努力は良い結果につながる","変えられないものがある","自分が何者かわかっている","人間関係は常に努力が必要","世界はそれなりに公平だ"], positiveWords:[], isFrame:true },
+    { dim:"コアビリーフの密度", id:"ja8", type:"scenario", text:"長年の信念に反する、説得力のある主張をされました。あなたはどうしますか？", context:"", options:["聞くが、これまで知ってきたことと違うので気持ちが変わらない。","その論理が自分の信念を見直すのに十分かどうか、本当に考える。","表面的には部分的に受け入れるが、深いところでは元の信念を保つ。","不快に感じ、話を終わらせたくなる。"], scores:[2,5,3,1] },
+    { dim:"コアビリーフの密度", id:"ja9", type:"text", text:"かつて固く信じていたが、今はそう思わなくなったことを教えてください。何があったのですか？", context:"一言か一文で十分です。", placeholder:"ここに書いてください..." },
+    { dim:"内的気象", id:"ja10", type:"scenario", text:"今の自分の内的空間はどれに一番近いですか？", context:"人生全体ではなく、ここ2〜3週間のことです。", options:["紙がたくさん落ちている——できごとが多く、処理しきれない。","整理されている——入ってくるものを処理する余裕がある。","静止している——あまりアクティブでなく、静かな感じ。","雨に濡れている——物事がぼやけて、意味をつかみにくい。"], scores:[2,5,3,1] },
+    { dim:"内的気象", id:"ja11", type:"scale", text:"今、新しい経験に向き合うエネルギーはどのくらいありますか？", context:"", scale:["全くない","十分にある"] },
+    { dim:"外部影響への感受性", id:"ja12", type:"scenario", text:"尊敬する人が、あなた自身が判断する前に「それは十分ではない」と言いました。何が起きますか？", context:"", options:["その人の見方が、そのものを見るレンズになってしまう。","受け取りつつも、自分の判断を続ける。","どの角度から言っているかを分析し、独立して再評価する。","受け入れないようにしようとするが、それでも頭に残る。"], scores:[1,4,5,2] },
+    { dim:"外部影響への感受性", id:"ja13", type:"scale", text:"自分の意見を持っていて、周囲のほとんどが反対意見のとき、自分の見方を保てますか？", context:"", scale:["とても難しい","いつでも保てる"] },
+    { dim:"外部影響への感受性", id:"ja14", type:"words", text:"あなたの考え方に最も影響を与える人のタイプを選んでください。", context:"当てはまるものをすべて選んでください。", words:["親","親しい友人","尊敬する人","説得力のある見知らぬ人","インターネット","過去の自分","特に影響を受ける人はいない"], positiveWords:[], isExternal:true },
+    { dim:"過去の経験の処理", id:"ja15", type:"scenario", text:"長い間考えていなかった過去の辛い経験——今のあなたの中でそれはどこにありますか？", context:"", options:["処理されて自分の一部になっており、抱えている感覚はない。","まだ内側にあるとわかるが、日常生活には影響していない。","特定のことへの反応に影響していると感じることがある。","わからない——処理されたのか、ただ保存されているだけなのか。"], scores:[5,4,2,2] },
+    { dim:"過去の経験の処理", id:"ja16", type:"scale", text:"過去の辛い経験を、引き戻されることなく見られますか？", context:"", scale:["常に引き戻される","距離を置いて見られる"] },
+    { dim:"過去の経験の処理", id:"ja17", type:"text", text:"まだ処理されていない、内側で待っている記憶や時期はありますか？", context:"説明しなくて大丈夫です。認識するだけで十分です。", placeholder:"ここに書いてください。空白でも構いません..." },
+    { dim:"自己の健康", id:"ja18", type:"scale", text:"全体的に、今のあなたの木の状態はどうですか？", context:"これはひっかけ問題ではありません——自分自身の感覚が重要です。", scale:["弱く、不安定","強く、根付いている"] },
   ],
 };
 
@@ -1186,39 +640,31 @@ let lang = 'en';
 let questions = [];
 let currentQ = 0;
 let answers = {};
-let scores = { tree: [], drawing: [], frame: [], weather: [], external: [], root: [] };
-let _dimScores = {};   // module-level, not on window
-let dimMap = {
-  'Self-Health': 'tree', 'Interpretive Pattern': 'drawing', 'Core Belief Density': 'frame',
-  'Internal Weather': 'weather', 'Sensitivity to Outside Influence': 'external',
-  'Processing of Past Experience': 'root',
-  'สุขภาพตัวตน': 'tree', 'รูปแบบการตีความ': 'drawing', 'ความหนาแน่นของ Core Beliefs': 'frame',
-  'สภาวะภายใน': 'weather', 'ความไวต่ออิทธิพลภายนอก': 'external',
-  'การจัดการประสบการณ์เก่า': 'root',
-  '自己の健康': 'tree', '解釈パターン': 'drawing', 'コアビリーフの密度': 'frame',
-  '内的気象': 'weather', '外部影響への感受性': 'external',
-  '過去の経験の処理': 'root',
-};
+let scores = { tree:[], drawing:[], frame:[], weather:[], external:[], root:[] };
+let _dimScores = {};
 let currentAnswer = null;
+let _typeTimer = null;
+
+const dimMap = {
+  'Self-Health':'tree','Interpretive Pattern':'drawing','Core Belief Density':'frame',
+  'Internal Weather':'weather','Sensitivity to Outside Influence':'external','Processing of Past Experience':'root',
+  'สุขภาพตัวตน':'tree','รูปแบบการตีความ':'drawing','ความหนาแน่นของ Core Beliefs':'frame',
+  'สภาวะภายใน':'weather','ความไวต่ออิทธิพลภายนอก':'external','การจัดการประสบการณ์เก่า':'root',
+  '自己の健康':'tree','解釈パターン':'drawing','コアビリーフの密度':'frame',
+  '内的気象':'weather','外部影響への感受性':'external','過去の経験の処理':'root',
+};
 
 // ══════════════════════════════════════════════
-// UTILS
+// UTILITIES
 // ══════════════════════════════════════════════
-
-// HTML-escape for any dynamic string placed into innerHTML
 function esc(s) {
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
-// Mulberry32 seeded PRNG — deterministic per score set
+// Mulberry32 seeded PRNG
 function makePrng(seed) {
   let s = (seed >>> 0) || 1;
-  return function () {
+  return () => {
     s += 0x6D2B79F5;
     let t = Math.imul(s ^ (s >>> 15), 1 | s);
     t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
@@ -1226,161 +672,235 @@ function makePrng(seed) {
   };
 }
 
+function avg(arr) { return arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : 3; }
+
 function showToast(msg) {
   const el = document.getElementById('toast');
   el.textContent = msg;
   el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2400);
+  setTimeout(() => el.classList.remove('show'), 2600);
+}
+
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Typewriter effect
+function typewriter(el, text, speed, onDone) {
+  if (_typeTimer) clearTimeout(_typeTimer);
+  if (REDUCED) { el.textContent = text; el.classList.remove('typing'); if(onDone) onDone(); return; }
+  el.textContent = '';
+  el.classList.add('typing');
+  let i = 0;
+  function step() {
+    if (i < text.length) {
+      el.textContent += text[i++];
+      const delay = (text[i-1] === ' ' || text[i-1] === '　') ? speed * 0.5 : speed;
+      _typeTimer = setTimeout(step, delay);
+    } else {
+      el.classList.remove('typing');
+      if (onDone) onDone();
+    }
+  }
+  step();
 }
 
 // ══════════════════════════════════════════════
-// SHARE / RESTORE
+// BACKGROUND PARTICLES
 // ══════════════════════════════════════════════
+(function initParticles() {
+  if (REDUCED) return;
+  const canvas = document.getElementById('bg-particles');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [];
 
-function buildShareHash(langCode, d) {
-  const parts = [
-    langCode,
-    d.tree.toFixed(2), d.drawing.toFixed(2), d.frame.toFixed(2),
-    d.weather.toFixed(2), d.external.toFixed(2), d.root.toFixed(2),
-  ];
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  function mkp() {
+    return {
+      x: Math.random() * W, y: Math.random() * H,
+      w: 4 + Math.random() * 7, h: 6 + Math.random() * 9,
+      a: (Math.random() - 0.5) * Math.PI * 0.4,
+      vx: (Math.random() - 0.5) * 0.18,
+      vy: 0.08 + Math.random() * 0.14,
+      vr: (Math.random() - 0.5) * 0.003,
+      op: 0.018 + Math.random() * 0.028,
+    };
+  }
+  for (let i = 0; i < 22; i++) particles.push(mkp());
+
+  function loop() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => {
+      p.x += p.vx; p.y += p.vy; p.a += p.vr;
+      if (p.y > H + 20) { p.y = -20; p.x = Math.random() * W; }
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.a);
+      ctx.strokeStyle = `rgba(24,23,21,${p.op})`;
+      ctx.lineWidth = 0.5;
+      ctx.strokeRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+    });
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+})();
+
+// ══════════════════════════════════════════════
+// SHARE / URL HASH
+// ══════════════════════════════════════════════
+function buildShareHash(l, d) {
+  const parts = [l, d.tree, d.drawing, d.frame, d.weather, d.external, d.root].map((v,i) => i===0 ? v : v.toFixed(2));
   return '#s/' + btoa(parts.join(','));
 }
-
 function parseShareHash(hash) {
   if (!hash || !hash.startsWith('#s/')) return null;
   try {
-    const decoded = atob(hash.slice(3));
-    const parts = decoded.split(',');
-    if (parts.length !== 7) return null;
-    const l = parts[0];
-    if (!['th', 'en', 'ja'].includes(l)) return null;
-    const keys = ['tree', 'drawing', 'frame', 'weather', 'external', 'root'];
+    const dec = atob(hash.slice(3));
+    const p = dec.split(',');
+    if (p.length !== 7) return null;
+    const l = p[0];
+    if (!['th','en','ja'].includes(l)) return null;
+    const keys = ['tree','drawing','frame','weather','external','root'];
     const d = {};
     for (let i = 0; i < 6; i++) {
-      const v = parseFloat(parts[i + 1]);
+      const v = parseFloat(p[i+1]);
       if (isNaN(v) || v < 1 || v > 5) return null;
       d[keys[i]] = v;
     }
     return { lang: l, d };
-  } catch (_) { return null; }
+  } catch { return null; }
 }
-
 function shareResults() {
-  const hash = buildShareHash(lang, _dimScores);
-  const url = location.href.split('#')[0] + hash;
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(url)
-      .then(() => showToast(COPY[lang].toastCopied))
-      .catch(() => fallbackCopy(url));
-  } else {
-    fallbackCopy(url);
-  }
-}
-
-function fallbackCopy(text) {
-  const ta = document.createElement('textarea');
-  ta.value = text;
-  ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
-  document.body.appendChild(ta);
-  ta.focus();
-  ta.select();
-  try {
-    document.execCommand('copy');
-    showToast(COPY[lang].toastCopied);
-  } catch (_) {
-    showToast(COPY[lang].toastFailed);
-  }
-  document.body.removeChild(ta);
+  const url = location.href.split('#')[0] + buildShareHash(lang, _dimScores);
+  const fallback = () => {
+    const ta = document.createElement('textarea');
+    ta.value = url;
+    ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); showToast(COPY[lang].toastCopied); }
+    catch { showToast(COPY[lang].toastFailed); }
+    document.body.removeChild(ta);
+  };
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(url).then(() => showToast(COPY[lang].toastCopied)).catch(fallback);
+  } else fallback();
 }
 
 // ══════════════════════════════════════════════
 // NAVIGATION
 // ══════════════════════════════════════════════
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  const el = document.getElementById('screen-' + id);
-  el.classList.add('active');
-  el.classList.remove('fade-in');
-  void el.offsetWidth;
-  el.classList.add('fade-in');
+let _activeScreen = 'lang';
+function showScreen(id, dir = 'fwd') {
+  const prev = document.querySelector('.screen.active');
+  if (prev) {
+    prev.classList.remove('active','entering-fwd','entering-back');
+    if (!REDUCED) {
+      prev.classList.add('exiting');
+      prev.addEventListener('animationend', () => prev.classList.remove('exiting'), { once: true });
+    }
+  }
+  const next = document.getElementById('screen-' + id);
+  next.classList.add('active');
+  if (!REDUCED) {
+    next.classList.add(dir === 'fwd' ? 'entering-fwd' : 'entering-back');
+    next.addEventListener('animationend', () => next.classList.remove('entering-fwd','entering-back'), { once: true });
+  }
+  _activeScreen = id;
 }
 
 function selectLang(l) {
   lang = l;
-  const c = COPY[lang];
   questions = QUESTIONS[lang];
-  document.getElementById('intro-title').textContent = c.introTitle;
-  // introBody contains hardcoded <p> tags — intentional HTML
-  document.getElementById('intro-body').innerHTML = c.introBody;
-  // metaQ/T/N contain hardcoded <span> tags — intentional HTML
-  document.getElementById('meta-questions').innerHTML = c.metaQ;
-  document.getElementById('meta-time').innerHTML = c.metaT;
-  document.getElementById('meta-note').innerHTML = c.metaN;
-  document.getElementById('btn-start').textContent = c.btnStart;
+  const c = COPY[lang];
+  document.getElementById('intro-title').textContent  = c.introTitle;
+  document.getElementById('intro-quote').textContent  = c.introQuote;
+  document.getElementById('intro-body').innerHTML     = c.introBody; // hardcoded HTML
+  document.getElementById('meta-questions').innerHTML = c.metaQ;    // hardcoded HTML
+  document.getElementById('meta-time').innerHTML      = c.metaT;
+  document.getElementById('meta-note').innerHTML      = c.metaN;
+  document.getElementById('btn-start').textContent    = c.btnStart;
   showScreen('intro');
 }
 
 function startAssessment() {
   currentQ = 0;
   answers = {};
-  scores = { tree: [], drawing: [], frame: [], weather: [], external: [], root: [] };
-  renderQuestion();
+  scores = { tree:[], drawing:[], frame:[], weather:[], external:[], root:[] };
+  renderQuestion(true);
   showScreen('question');
 }
 
-function restartAssessment() {
-  showScreen('lang');
-}
+function restartAssessment() { showScreen('lang', 'back'); }
 
-function renderQuestion() {
+// ══════════════════════════════════════════════
+// QUESTION RENDERING
+// ══════════════════════════════════════════════
+function renderQuestion(animate) {
   const q = questions[currentQ];
   const c = COPY[lang];
   currentAnswer = null;
 
   document.getElementById('q-dim-label').textContent = q.dim;
-  document.getElementById('q-counter').textContent = `${currentQ + 1} / ${questions.length}`;
+  document.getElementById('q-counter').textContent   = `${currentQ + 1} / ${questions.length}`;
   document.getElementById('q-progress-fill').style.width = `${(currentQ / questions.length) * 100}%`;
-  document.getElementById('q-text').textContent = q.text;
-  document.getElementById('q-context').textContent = q.context || '';
 
-  // Back button
   const backBtn = document.getElementById('btn-back');
   backBtn.textContent = c.btnBack;
-  backBtn.disabled = currentQ === 0;
+  backBtn.disabled    = currentQ === 0;
 
-  // Keyboard hint
   const hintEl = document.getElementById('key-hint');
-  if (q.type === 'scale') hintEl.textContent = c.keyHintScale;
-  else if (q.type === 'scenario') hintEl.textContent = c.keyHintScenario;
-  else hintEl.textContent = c.keyHintOther;
-
-  const area = document.getElementById('q-input-area');
-  area.innerHTML = '';
+  hintEl.textContent = q.type === 'scale' ? c.keyHintScale : q.type === 'scenario' ? c.keyHintScenario : c.keyHintOther;
 
   const isLast = currentQ === questions.length - 1;
   const nextBtn = document.getElementById('btn-next');
   document.getElementById('btn-next-label').textContent = isLast ? c.btnFinish : c.btnNext;
   nextBtn.classList.remove('enabled');
 
+  const ctxEl = document.getElementById('q-context');
+  ctxEl.textContent = q.context || '';
+
+  const area = document.getElementById('q-input-area');
+  area.innerHTML = '';
+
+  function revealInput() {
+    area.style.opacity = '0';
+    area.style.transition = 'opacity 0.4s';
+    buildInput(q, nextBtn, area);
+    requestAnimationFrame(() => { area.style.opacity = '1'; });
+  }
+
+  const textEl = document.getElementById('q-text');
+  if (animate && !REDUCED) {
+    typewriter(textEl, q.text, 26, revealInput);
+  } else {
+    textEl.textContent = q.text;
+    textEl.classList.remove('typing');
+    revealInput();
+  }
+}
+
+function buildInput(q, nextBtn, area) {
   if (q.type === 'scale') {
     const wrap = document.createElement('div');
     wrap.className = 'scale-wrap';
     const labels = document.createElement('div');
     labels.className = 'scale-labels';
-    // scale labels are hardcoded per language — safe
-    const l0 = document.createElement('span');
-    l0.textContent = q.scale[0];
-    const l1 = document.createElement('span');
-    l1.textContent = q.scale[1];
-    labels.appendChild(l0);
-    labels.appendChild(l1);
+    const l0 = document.createElement('span'); l0.textContent = q.scale[0];
+    const l1 = document.createElement('span'); l1.textContent = q.scale[1];
+    labels.appendChild(l0); labels.appendChild(l1);
     const btns = document.createElement('div');
     btns.className = 'scale-buttons';
     for (let i = 1; i <= 5; i++) {
       const b = document.createElement('button');
       b.className = 'scale-btn';
-      b.textContent = i;
-      b.dataset.value = i;
+      b.innerHTML = `<span>${i}</span>`;
+      b.dataset.v = i;
       b.onclick = () => {
         btns.querySelectorAll('.scale-btn').forEach(x => x.classList.remove('selected'));
         b.classList.add('selected');
@@ -1389,26 +909,19 @@ function renderQuestion() {
       };
       btns.appendChild(b);
     }
-    wrap.appendChild(labels);
-    wrap.appendChild(btns);
+    wrap.appendChild(labels); wrap.appendChild(btns);
     area.appendChild(wrap);
 
   } else if (q.type === 'scenario') {
     const wrap = document.createElement('div');
     wrap.className = 'scenario-options';
     q.options.forEach((opt, i) => {
-      const b = document.createElement('button');
+      const b  = document.createElement('button');
       b.className = 'scenario-opt';
-      b.dataset.index = i;
-      // SECURITY: build children via textContent, not innerHTML, to prevent
-      // XSS if option text ever comes from user-controlled data in the future
-      const labelSpan = document.createElement('span');
-      labelSpan.className = 'opt-label';
-      labelSpan.textContent = String.fromCharCode(65 + i);
-      const textSpan = document.createElement('span');
-      textSpan.textContent = opt;
-      b.appendChild(labelSpan);
-      b.appendChild(textSpan);
+      b.dataset.i = i;
+      const lb = document.createElement('span'); lb.className = 'opt-label'; lb.textContent = String.fromCharCode(65+i);
+      const tx = document.createElement('span'); tx.className  = 'opt-text';  tx.textContent = opt;
+      b.appendChild(lb); b.appendChild(tx);
       b.onclick = () => {
         wrap.querySelectorAll('.scenario-opt').forEach(x => x.classList.remove('selected'));
         b.classList.add('selected');
@@ -1420,48 +933,32 @@ function renderQuestion() {
     area.appendChild(wrap);
 
   } else if (q.type === 'words') {
-    const instr = document.createElement('p');
-    instr.className = 'word-instruction';
-    instr.textContent = q.context;
-    area.appendChild(instr);
-    const grid = document.createElement('div');
-    grid.className = 'word-grid';
-    let selectedWords = [];
+    const instr = document.createElement('p'); instr.className = 'word-instruction'; instr.textContent = q.context;
+    const grid  = document.createElement('div'); grid.className = 'word-grid';
+    let sel = [];
     q.words.forEach(word => {
-      const b = document.createElement('button');
-      b.className = 'word-chip';
-      b.textContent = word;
+      const b = document.createElement('button'); b.className = 'word-chip'; b.textContent = word;
       b.onclick = () => {
         b.classList.toggle('selected');
-        if (b.classList.contains('selected')) {
-          selectedWords.push(word);
-        } else {
-          selectedWords = selectedWords.filter(w => w !== word);
-        }
-        currentAnswer = selectedWords;
+        sel = b.classList.contains('selected') ? [...sel, word] : sel.filter(w => w !== word);
+        currentAnswer = sel;
         nextBtn.classList.add('enabled');
       };
       grid.appendChild(b);
     });
-    area.appendChild(grid);
+    area.appendChild(instr); area.appendChild(grid);
     nextBtn.classList.add('enabled');
     currentAnswer = [];
 
   } else if (q.type === 'text') {
-    const wrap = document.createElement('div');
-    wrap.className = 'text-input-wrap';
-    const ta = document.createElement('textarea');
-    ta.className = 'text-input-field';
-    ta.rows = 3;
+    const wrap = document.createElement('div'); wrap.className = 'text-input-wrap';
+    const ta   = document.createElement('textarea');
+    ta.className   = 'text-input-field';
+    ta.rows        = 3;
     ta.placeholder = q.placeholder;
-    // SECURITY: limit free-text input length to prevent memory abuse
-    ta.maxLength = 500;
-    ta.oninput = () => {
-      currentAnswer = ta.value;
-      nextBtn.classList.add('enabled');
-    };
-    wrap.appendChild(ta);
-    area.appendChild(wrap);
+    ta.maxLength   = 500;
+    ta.oninput     = () => { currentAnswer = ta.value; nextBtn.classList.add('enabled'); };
+    wrap.appendChild(ta); area.appendChild(wrap);
     nextBtn.classList.add('enabled');
     currentAnswer = '';
   }
@@ -1470,213 +967,164 @@ function renderQuestion() {
 function prevQuestion() {
   if (currentQ === 0) return;
   currentQ--;
-  renderQuestion();
+  renderQuestion(false);
 }
 
 function nextQuestion() {
   if (!document.getElementById('btn-next').classList.contains('enabled')) return;
   const q = questions[currentQ];
-  // Store answer — text answers are stored as plain strings, never rendered as HTML
   answers[q.id] = currentAnswer;
+  const dk = dimMap[q.dim] || 'tree';
 
-  const dimKey = dimMap[q.dim] || 'tree';
   if (q.type === 'scale') {
-    scores[dimKey].push(currentAnswer);
+    scores[dk].push(currentAnswer);
   } else if (q.type === 'scenario') {
-    scores[dimKey].push(currentAnswer.score);
+    scores[dk].push(currentAnswer.score);
   } else if (q.type === 'words') {
     if (q.isFrame) {
-      const count = Array.isArray(currentAnswer) ? currentAnswer.length : 0;
-      scores[dimKey].push(Math.max(1, 5 - count));
+      scores[dk].push(Math.max(1, 5 - (Array.isArray(currentAnswer) ? currentAnswer.length : 0)));
     } else if (q.isExternal) {
-      const count = Array.isArray(currentAnswer) ? currentAnswer.length : 0;
-      const hasNone = Array.isArray(currentAnswer) && currentAnswer.some(w =>
-        w === 'ไม่มีใครมีอิทธิพลมากพิเศษ' || w === 'No one has particular influence' || w === '特に影響を受ける人はいない'
-      );
-      scores[dimKey].push(hasNone ? 5 : Math.max(1, 5 - Math.floor(count / 2)));
+      const none = Array.isArray(currentAnswer) && currentAnswer.some(w =>
+        ['ไม่มีใครมีอิทธิพลมากพิเศษ','No one has particular influence','特に影響を受ける人はいない'].includes(w));
+      const cnt = Array.isArray(currentAnswer) ? currentAnswer.length : 0;
+      scores[dk].push(none ? 5 : Math.max(1, 5 - Math.floor(cnt / 2)));
     } else {
-      if (!Array.isArray(currentAnswer)) { scores[dimKey].push(3); }
-      else {
-        const posWords = q.positiveWords || [];
-        const posCount = currentAnswer.filter(w => posWords.includes(w)).length;
-        scores[dimKey].push(posCount > 0 ? Math.min(5, 3 + posCount) : 3);
-      }
+      const pos = (q.positiveWords || []).filter(w => (currentAnswer||[]).includes(w)).length;
+      scores[dk].push(pos > 0 ? Math.min(5, 3 + pos) : 3);
     }
   } else if (q.type === 'text') {
-    scores[dimKey].push(typeof currentAnswer === 'string' && currentAnswer.trim().length > 2 ? 4 : 3);
+    scores[dk].push(typeof currentAnswer === 'string' && currentAnswer.trim().length > 2 ? 4 : 3);
   }
 
   if (currentQ < questions.length - 1) {
     currentQ++;
-    renderQuestion();
+    renderQuestion(true);
   } else {
-    showTransitionAndResult();
+    showTransitionThenResult();
   }
 }
 
 // ══════════════════════════════════════════════
-// KEYBOARD NAVIGATION
+// KEYBOARD SHORTCUTS
 // ══════════════════════════════════════════════
 document.addEventListener('keydown', e => {
-  const qScreen = document.getElementById('screen-question');
-  if (!qScreen.classList.contains('active')) return;
-  // Don't intercept when typing in textarea
-  if (document.activeElement && document.activeElement.tagName === 'TEXTAREA') return;
-
+  if (_activeScreen !== 'question') return;
+  if (document.activeElement?.tagName === 'TEXTAREA') return;
   const q = questions[currentQ];
   const key = e.key;
-
-  if (key === 'ArrowLeft' || key === 'Backspace') {
-    if (key === 'Backspace') return; // let browser handle
-    e.preventDefault();
-    prevQuestion();
-    return;
-  }
-
+  if (key === 'ArrowLeft') { e.preventDefault(); prevQuestion(); return; }
   if (q.type === 'scale') {
     const n = parseInt(key);
-    if (n >= 1 && n <= 5) {
-      e.preventDefault();
-      const btns = document.querySelectorAll('.scale-btn');
-      if (btns[n - 1]) btns[n - 1].click();
-    }
+    if (n >= 1 && n <= 5) { e.preventDefault(); document.querySelectorAll('.scale-btn')[n-1]?.click(); }
   } else if (q.type === 'scenario') {
     const lower = key.toLowerCase();
-    let idx = -1;
-    if (lower >= 'a' && lower <= 'd') idx = lower.charCodeAt(0) - 97;
-    else if (key >= '1' && key <= '4') idx = parseInt(key) - 1;
-    if (idx >= 0 && idx < q.options.length) {
-      e.preventDefault();
-      const opts = document.querySelectorAll('.scenario-opt');
-      if (opts[idx]) opts[idx].click();
-    }
+    let idx = lower >= 'a' && lower <= 'd' ? lower.charCodeAt(0)-97 : (key >= '1' && key <= '4' ? parseInt(key)-1 : -1);
+    if (idx >= 0 && idx < q.options.length) { e.preventDefault(); document.querySelectorAll('.scenario-opt')[idx]?.click(); }
   }
-
-  if (key === 'Enter' || key === 'ArrowRight') {
-    const btn = document.getElementById('btn-next');
-    if (btn.classList.contains('enabled')) {
-      e.preventDefault();
-      btn.click();
-    }
+  if ((key === 'Enter' || key === 'ArrowRight') && document.getElementById('btn-next').classList.contains('enabled')) {
+    e.preventDefault(); document.getElementById('btn-next').click();
   }
 });
 
 // ══════════════════════════════════════════════
 // RESULT
 // ══════════════════════════════════════════════
-function avg(arr) {
-  if (!arr.length) return 3;
-  return arr.reduce((a, b) => a + b, 0) / arr.length;
-}
-
-function showTransitionAndResult() {
-  document.getElementById('tr-text').textContent = COPY[lang].trText;
+function showTransitionThenResult() {
+  const c = COPY[lang];
   showScreen('transition');
+  const trEl = document.getElementById('tr-text');
+  typewriter(trEl, c.trText, 45, null);
   setTimeout(() => {
     buildResult(false);
     showScreen('result');
     animateBars();
-    drawTree();
-  }, 2200);
+    drawTreeOnCanvas(document.getElementById('treeCanvas'), _dimScores, true);
+  }, 2600);
 }
 
 function buildResult(isShared) {
   const c = COPY[lang];
   _dimScores = {
-    tree: avg(scores.tree),
+    tree:    avg(scores.tree),
     drawing: avg(scores.drawing),
-    frame: avg(scores.frame),
+    frame:   avg(scores.frame),
     weather: avg(scores.weather),
-    external: avg(scores.external),
-    root: avg(scores.root),
+    external:avg(scores.external),
+    root:    avg(scores.root),
   };
 
-  // Shared result banner
   const banner = document.getElementById('shared-banner');
-  if (isShared) {
-    banner.textContent = c.sharedResult;
-    banner.classList.add('visible');
-  } else {
-    banner.classList.remove('visible');
-  }
+  banner.textContent = c.sharedResult;
+  banner.classList.toggle('visible', !!isShared);
 
   const overall = avg(Object.values(_dimScores));
   const titles = {
-    th: overall >= 4 ? "ต้นไม้ของคุณแข็งแรง" : overall >= 3 ? "ต้นไม้ของคุณกำลังเติบโต" : "ต้นไม้ของคุณต้องการการดูแล",
-    en: overall >= 4 ? "Your tree is strong" : overall >= 3 ? "Your tree is growing" : "Your tree needs tending",
-    ja: overall >= 4 ? "あなたの木は強い" : overall >= 3 ? "あなたの木は成長中です" : "あなたの木はケアを必要としています",
+    th: overall>=4?"ต้นไม้ของคุณแข็งแรง":overall>=3?"ต้นไม้ของคุณกำลังเติบโต":"ต้นไม้ของคุณต้องการการดูแล",
+    en: overall>=4?"Your tree is strong":overall>=3?"Your tree is growing":"Your tree needs tending",
+    ja: overall>=4?"あなたの木は強い":overall>=3?"あなたの木は成長中です":"あなたの木はケアを必要としています",
   };
-  document.getElementById('res-label').textContent = c.resLabel;
-  document.getElementById('res-title').textContent = titles[lang];
+  document.getElementById('res-label').textContent   = c.resLabel;
+  document.getElementById('res-title').textContent   = titles[lang];
   document.getElementById('summary-label').textContent = c.summaryLabel;
-  document.getElementById('result-footer').textContent = c.footer;
-
-  // Action button labels
-  document.getElementById('btn-save').textContent = c.btnSave;
-  document.getElementById('btn-share').textContent = c.btnShare;
+  document.getElementById('btn-save').textContent    = c.btnSave;
+  document.getElementById('btn-share').textContent   = c.btnShare;
   document.getElementById('btn-restart').textContent = c.btnRestart;
+  document.getElementById('result-footer').innerHTML = esc(c.footer).replace('\n','<br>');
 
+  const dimDescs = {
+    th:{
+      tree:   s=>s>=4?"รากของคุณยึดแน่น ตัวตนไม่ถูกสั่นคลอนง่าย":s>=3?"มีแกนกลาง แต่ยังมีช่วงที่รู้สึกไม่มั่นคง":"ต้นไม้กำลังมองหาจุดยืน การสั่นคลอนไม่ใช่ความล้มเหลว",
+      drawing:s=>s>=4?"คุณตีความด้วยความยืดหยุ่น — เปิดรับและพร้อมเปลี่ยน":s>=3?"การตีความส่วนใหญ่สมดุล มีบางช่วงที่ตึง":"แนวโน้มตีความในแง่ลบหรือยึดติดกับภาพแรก",
+      frame:  s=>s>=4?"กรอบมีน้อย จิตใจยืดหยุ่นต่อข้อมูลใหม่":s>=3?"มีกรอบในระดับปกติ ส่วนใหญ่ช่วยทำให้มั่นคง":"กรอบหนาแน่น — อาจทำให้การรับมุมมองใหม่ยากขึ้น",
+      weather:s=>s>=4?"พื้นที่ภายในเป็นระเบียบ มีพลังในการ engage":s>=3?"สภาพอากาศปกติ บางวันดี บางวันหนัก":"ช่วงนี้มีกระดาษค้างสะสม ต้องการเวลาจัดระเบียบ",
+      external:s=>s>=4?"มีความเป็นตัวของตัวเองสูง ไม่ถูก pre-color ง่าย":s>=3?"รับอิทธิพลได้แต่ยังมีแกนของตัวเอง":"กระดาษที่เข้ามามักมีสีจากคนอื่นอยู่ก่อนแล้ว",
+      root:   s=>s>=4?"รากดูดซึมประสบการณ์เก่าได้ดี ไม่มีค้างสะสม":s>=3?"ส่วนใหญ่ผ่านไปได้ แต่ยังมีบางอย่างที่รอการ process":"มีประสบการณ์ที่ยังค้างอยู่และรอการจัดการ",
+    },
+    en:{
+      tree:   s=>s>=4?"Your roots hold firm. Your sense of self isn't easily shaken.":s>=3?"There's a core, but some instability still surfaces at times.":"Your tree is searching for ground. Unsteadiness isn't failure.",
+      drawing:s=>s>=4?"You interpret with flexibility — open to new readings and willing to revise.":s>=3?"Mostly balanced interpretation, with some rigidity in certain areas.":"A tendency toward negative framing or holding to first impressions.",
+      frame:  s=>s>=4?"Few frames — your mind stays flexible to new information.":s>=3?"A normal density of frames; most help maintain stability.":"Dense frames — new perspectives may be harder to take in.",
+      weather:s=>s>=4?"Your inner space is ordered. You have energy to engage.":s>=3?"Ordinary weather — some days clear, some heavy.":"Papers are accumulating right now. Some clearing would help.",
+      external:s=>s>=4?"Strong sense of self — not easily pre-colored by others.":s>=3?"You take in influence but keep your own center.":"Papers arriving already colored by others' views.",
+      root:   s=>s>=4?"Your roots absorb well. Nothing much is waiting.":s>=3?"Most things have passed through, but something still waits.":"Some experiences remain unprocessed — still sitting inside.",
+    },
+    ja:{
+      tree:   s=>s>=4?"根はしっかり張っています。自己感覚は簡単には揺らぎません。":s>=3?"核はありますが、不安定さが時折表れます。":"木は地を探しています。不安定さは失敗ではありません。",
+      drawing:s=>s>=4?"柔軟に解釈します——新しい読み方に開かれ、修正を厭いません。":s>=3?"大体バランスが取れていますが、一部硬直した部分があります。":"ネガティブな解釈や第一印象への固執が見られます。",
+      frame:  s=>s>=4?"枠が少なく、新しい情報に対して柔軟です。":s>=3?"通常の枠の密度——多くは安定を保つのに役立っています。":"枠が密——新しい視点を受け入れるのが難しいかもしれません。",
+      weather:s=>s>=4?"内的空間は整っています。関わるエネルギーがあります。":s>=3?"普通の気象——晴れの日もあれば重い日もあります。":"今は紙が積み重なっています。整理する時間が必要です。",
+      external:s=>s>=4?"自己感覚が強く——他者に簡単に色付けされません。":s>=3?"影響を受け入れつつも、自分の中心を保っています。":"届く紙にはすでに他者の見方の色がついています。",
+      root:   s=>s>=4?"根はよく吸収しています。待っているものはほとんどありません。":s>=3?"ほとんどのことは通り過ぎましたが、まだ待っているものがあります。":"いくつかの経験がまだ処理されていません——内側に留まっています。",
+    },
+  };
+  const scoreLabels = {
+    th:{1:"ต่ำมาก",2:"ต่ำ",3:"ปานกลาง",4:"ดี",5:"ดีมาก"},
+    en:{1:"Low",2:"Below avg",3:"Average",4:"Good",5:"Strong"},
+    ja:{1:"とても低い",2:"低い",3:"普通",4:"良い",5:"強い"},
+  };
+
+  const dimKeys = ['tree','drawing','frame','weather','external','root'];
   const grid = document.getElementById('dimension-grid');
   grid.innerHTML = '';
-  const dimKeys = ['tree','drawing','frame','weather','external','root'];
-  const dimDescs = {
-    th: {
-      tree: s => s >= 4 ? "รากของคุณยึดแน่น ตัวตนไม่ถูกสั่นคลอนง่าย" : s >= 3 ? "มีแกนกลาง แต่ยังมีช่วงที่รู้สึกไม่มั่นคง" : "ต้นไม้กำลังมองหาจุดยืน การสั่นคลอนไม่ใช่ความล้มเหลว",
-      drawing: s => s >= 4 ? "คุณตีความด้วยความยืดหยุ่น — เปิดรับและพร้อมเปลี่ยน" : s >= 3 ? "การตีความส่วนใหญ่สมดุล มีบางช่วงที่ตึง" : "แนวโน้มตีความในแง่ลบหรือยึดติดกับภาพแรก",
-      frame: s => s >= 4 ? "กรอบมีน้อย จิตใจยืดหยุ่นต่อข้อมูลใหม่" : s >= 3 ? "มีกรอบในระดับปกติ ส่วนใหญ่ช่วยทำให้มั่นคง" : "กรอบหนาแน่น — อาจทำให้การรับมุมมองใหม่ยากขึ้น",
-      weather: s => s >= 4 ? "พื้นที่ภายในเป็นระเบียบ มีพลังในการ engage" : s >= 3 ? "สภาพอากาศปกติ บางวันดี บางวันหนัก" : "ช่วงนี้มีกระดาษค้างสะสม ต้องการเวลาจัดระเบียบ",
-      external: s => s >= 4 ? "มีความเป็นตัวของตัวเองสูง ไม่ถูก pre-color ง่าย" : s >= 3 ? "รับอิทธิพลได้แต่ยังมีแกนของตัวเอง" : "กระดาษที่เข้ามามักมีสีจากคนอื่นอยู่ก่อนแล้ว",
-      root: s => s >= 4 ? "รากดูดซึมประสบการณ์เก่าได้ดี ไม่มีค้างสะสม" : s >= 3 ? "ส่วนใหญ่ผ่านไปได้ แต่ยังมีบางอย่างที่รอการ process" : "มีประสบการณ์ที่ยังค้างอยู่และรอการจัดการ",
-    },
-    en: {
-      tree: s => s >= 4 ? "Your roots hold firm. Your sense of self isn't easily shaken." : s >= 3 ? "There's a core, but some instability still surfaces at times." : "Your tree is searching for ground. Unsteadiness isn't failure.",
-      drawing: s => s >= 4 ? "You interpret with flexibility — open to new readings and willing to revise." : s >= 3 ? "Mostly balanced interpretation, with some rigidity in certain areas." : "A tendency toward negative framing or holding to first impressions.",
-      frame: s => s >= 4 ? "Few frames — your mind stays flexible to new information." : s >= 3 ? "A normal density of frames; most help maintain stability." : "Dense frames — new perspectives may be harder to take in.",
-      weather: s => s >= 4 ? "Your inner space is ordered. You have energy to engage." : s >= 3 ? "Ordinary weather — some days clear, some heavy." : "Papers are accumulating right now. Some clearing would help.",
-      external: s => s >= 4 ? "Strong sense of self — not easily pre-colored by others." : s >= 3 ? "You take in influence but keep your own center." : "Papers arriving already colored by others' views.",
-      root: s => s >= 4 ? "Your roots absorb well. Nothing much is waiting." : s >= 3 ? "Most things have passed through, but something still waits." : "Some experiences remain unprocessed — still sitting inside.",
-    },
-    ja: {
-      tree: s => s >= 4 ? "根はしっかり張っています。自己感覚は簡単には揺らぎません。" : s >= 3 ? "核はありますが、不安定さが時折表れます。" : "木は地を探しています。不安定さは失敗ではありません。",
-      drawing: s => s >= 4 ? "柔軟に解釈します——新しい読み方に開かれ、修正を厭いません。" : s >= 3 ? "大体バランスが取れていますが、一部硬直した部分があります。" : "ネガティブな解釈や第一印象への固執が見られます。",
-      frame: s => s >= 4 ? "枠が少なく、新しい情報に対して柔軟です。" : s >= 3 ? "通常の枠の密度——多くは安定を保つのに役立っています。" : "枠が密——新しい視点を受け入れるのが難しいかもしれません。",
-      weather: s => s >= 4 ? "内的空間は整っています。関わるエネルギーがあります。" : s >= 3 ? "普通の気象——晴れの日もあれば重い日もあります。" : "今は紙が積み重なっています。整理する時間が必要です。",
-      external: s => s >= 4 ? "自己感覚が強く——他者に簡単に色付けされません。" : s >= 3 ? "影響を受け入れつつも、自分の中心を保っています。" : "届く紙にはすでに他者の見方の色がついています。",
-      root: s => s >= 4 ? "根はよく吸収しています。待っているものはほとんどありません。" : s >= 3 ? "ほとんどのことは通り過ぎましたが、まだ待っているものがあります。" : "いくつかの経験がまだ処理されていません——内側に留まっています。",
-    },
-  };
-
-  const scoreLabels = {
-    th: { 1:"ต่ำมาก", 2:"ต่ำ", 3:"ปานกลาง", 4:"ดี", 5:"ดีมาก" },
-    en: { 1:"Low", 2:"Below avg", 3:"Average", 4:"Good", 5:"Strong" },
-    ja: { 1:"とても低い", 2:"低い", 3:"普通", 4:"良い", 5:"強い" },
-  };
-
   dimKeys.forEach((key, i) => {
     const s = _dimScores[key];
-    const rounded = Math.round(s);
-    const row = document.createElement('div');
-    row.className = 'dim-row';
-    // Use esc() for any value that could theoretically be tampered with
+    const row = document.createElement('div'); row.className = 'dim-row';
     row.innerHTML = `
       <div class="dim-header">
         <span class="dim-name">${esc(c.dimNames[i])}</span>
-        <span class="dim-score-label">${esc(scoreLabels[lang][rounded] || '')}</span>
+        <span class="dim-score-label">${esc(scoreLabels[lang][Math.round(s)] || '')}</span>
       </div>
-      <div class="dim-bar-bg">
-        <div class="dim-bar-fill" data-width="${esc(((s / 5) * 100).toFixed(1))}" style="width:0%"></div>
-      </div>
-      <p class="dim-desc">${esc(dimDescs[lang][key](s))}</p>
-    `;
+      <div class="dim-bar-bg"><div class="dim-bar-fill" data-w="${((s/5)*100).toFixed(1)}" style="width:0%"></div></div>
+      <p class="dim-desc">${esc(dimDescs[lang][key](s))}</p>`;
     grid.appendChild(row);
   });
 
-  const weakest = dimKeys.reduce((a, b) => _dimScores[a] < _dimScores[b] ? a : b);
-  const strongest = dimKeys.reduce((a, b) => _dimScores[a] > _dimScores[b] ? a : b);
+  const weakest  = dimKeys.reduce((a,b) => _dimScores[a] < _dimScores[b] ? a : b);
+  const strongest = dimKeys.reduce((a,b) => _dimScores[a] > _dimScores[b] ? a : b);
   const summaries = {
-    th: `ต้นไม้ของคุณมีจุดแข็งที่ ${c.dimNames[dimKeys.indexOf(strongest)]} และจุดที่ควรใส่ใจมากขึ้นคือ ${c.dimNames[dimKeys.indexOf(weakest)]} ผลลัพธ์นี้ไม่ใช่การตัดสิน — เป็นแค่ภาพ snapshot ของต้นไม้ในวันนี้`,
-    en: `Your tree shows strength in ${c.dimNames[dimKeys.indexOf(strongest)]}, with the most room to grow in ${c.dimNames[dimKeys.indexOf(weakest)]}. This result is not a judgment — it's a snapshot of your tree today.`,
-    ja: `あなたの木は${c.dimNames[dimKeys.indexOf(strongest)]}に強みを示しており、${c.dimNames[dimKeys.indexOf(weakest)]}に最も成長の余地があります。この結果は判断ではありません——今日の木のスナップショットです。`,
+    th:`ต้นไม้ของคุณมีจุดแข็งที่ ${c.dimNames[dimKeys.indexOf(strongest)]} และจุดที่ควรใส่ใจมากขึ้นคือ ${c.dimNames[dimKeys.indexOf(weakest)]} ผลลัพธ์นี้ไม่ใช่การตัดสิน — เป็นแค่ภาพ snapshot ของต้นไม้ในวันนี้`,
+    en:`Your tree shows strength in ${c.dimNames[dimKeys.indexOf(strongest)]}, with the most room to grow in ${c.dimNames[dimKeys.indexOf(weakest)]}. This result is not a judgment — it's a snapshot of your tree today.`,
+    ja:`あなたの木は${c.dimNames[dimKeys.indexOf(strongest)]}に強みを示しており、${c.dimNames[dimKeys.indexOf(weakest)]}に最も成長の余地があります。この結果は判断ではありません——今日の木のスナップショットです。`,
   };
   document.getElementById('summary-text').textContent = summaries[lang];
 }
@@ -1684,208 +1132,283 @@ function buildResult(isShared) {
 function animateBars() {
   setTimeout(() => {
     document.querySelectorAll('.dim-bar-fill').forEach(el => {
-      el.style.width = el.dataset.width + '%';
+      el.style.width = el.dataset.w + '%';
     });
-  }, 100);
+  }, 120);
 }
 
 // ══════════════════════════════════════════════
-// TREE DRAWING  — seeded PRNG for consistent output
+// TREE DRAWING — procedural fractal
+// Dimensions map:
+//   tree     → trunk height/thickness/health
+//   drawing  → branch spread angle (rigid ↔ open)
+//   frame    → red frame marks on trunk (fewer = fewer marks)
+//   weather  → scattered papers / leaf density
+//   external → trunk lean, dashed external lines
+//   root     → root depth and cleanliness
 // ══════════════════════════════════════════════
-function drawTree() {
-  const canvas = document.getElementById('treeCanvas');
+function drawTreeOnCanvas(canvas, d, animated) {
   const ctx = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
-  const d = _dimScores;
 
-  // Seed from scores so same answers always produce same tree
-  const seed = Math.round(
-    d.tree * 100 + d.drawing * 1000 + d.frame * 10000 +
-    d.weather * 100000 + d.external * 1000000 + d.root * 10000000
-  );
-  const rand = makePrng(seed);
+  const th = d.tree,    ip = d.drawing, cb = d.frame,
+        wt = d.weather, ex = d.external, ro = d.root;
 
-  ctx.clearRect(0, 0, W, H);
-  ctx.fillStyle = '#f5f4f0';
-  ctx.fillRect(0, 0, W, H);
+  // Seeded PRNG — same scores → same tree
+  const seed = Math.round(th*97 + ip*1031 + cb*10007 + wt*100003 + ex*1000033 + ro*10000019);
+  const rng = makePrng(seed);
+  const W2 = (v, s=1.5) => v + (rng()-0.5) * s * 2;
 
-  const treeH = d.tree, drawH = d.drawing, frameH = d.frame,
-        weatherH = d.weather, extH = d.external, rootH = d.root;
+  // Layout
+  const leanPx = (3 - ex) * 3.5;  // lean left when susceptible to external
+  const CX = W/2 + leanPx;
+  const GY = H - 52;
 
-  const cx = W / 2, ground = H - 60;
-  const trunkH = 70 + treeH * 10;
-  const trunkW = 7 + treeH;
-  const canopyR = 50 + treeH * 12;
+  // Trunk: self_health → height/thickness
+  const TH = 46 + th * 17;    // trunk height: 63–131 px
+  const TB = 5 + th * 2.3;    // trunk base width: 7.3–16.5 px
 
-  // Weather atmosphere
-  if (weatherH < 3) {
+  // Branch: interpretive → spread
+  const BSPREAD = 0.26 + ip * 0.1;   // 0.36 (rigid) to 0.76 (open)
+  const BDECAY  = 0.58 + ip * 0.04;  // 0.62 to 0.78
+  const BINIT   = 14 + th * 3 + ip * 2;
+
+  const ink  = a => `rgba(24,23,21,${a})`;
+  const red  = a => `rgba(173,31,25,${a})`;
+  const leafPos = [];  // collected during branch drawing
+
+  // ── helpers ──────────────────────────────
+  function paperScrap(x, y, angle, sz=1) {
+    const pw=(4+rng()*6)*sz, ph=(6+rng()*7)*sz;
     ctx.save();
-    for (let i = 0; i < 18; i++) {
+    ctx.translate(W2(x,0.8), W2(y,0.8));
+    ctx.rotate(angle);
+    ctx.strokeStyle = ink(0.1+rng()*0.06);
+    ctx.lineWidth = 0.6;
+    ctx.strokeRect(-pw/2,-ph/2,pw,ph);
+    if (ph>8) {
       ctx.beginPath();
-      const x = rand() * W, y = rand() * (H * 0.6);
-      ctx.moveTo(x, y);
-      ctx.lineTo(x + 1, y + 8 + rand() * 10);
-      ctx.strokeStyle = 'rgba(100,120,160,0.08)';
-      ctx.lineWidth = 1;
-      ctx.stroke();
+      ctx.moveTo(-pw/2+1.2,-ph/2+ph*0.38);
+      ctx.lineTo(pw/2-1.2,-ph/2+ph*0.38);
+      ctx.strokeStyle = ink(0.05); ctx.lineWidth=0.4; ctx.stroke();
     }
     ctx.restore();
   }
 
-  // Roots
-  ctx.save();
-  const rootCount = Math.round(rootH + 1);
-  for (let i = 0; i < rootCount; i++) {
-    const angle = (Math.PI / (rootCount + 1)) * (i + 1);
-    const len = 20 + rootH * 8;
+  // ── layers ───────────────────────────────
+  function drawBg() {
+    ctx.fillStyle = '#f5f2ea';
+    ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle = ink(0.03); ctx.lineWidth=0.5;
+    for(let y=18;y<H;y+=22){
+      ctx.beginPath(); ctx.moveTo(8,y); ctx.lineTo(W-8,y); ctx.stroke();
+    }
+  }
+
+  function drawGround() {
+    ctx.strokeStyle=ink(0.18); ctx.lineWidth=0.8;
     ctx.beginPath();
-    ctx.moveTo(cx, ground);
-    ctx.quadraticCurveTo(
-      cx + Math.cos(Math.PI + angle) * len * 0.5,
-      ground + len * 0.4,
-      cx + Math.cos(Math.PI + angle) * len,
-      ground + len * 0.6
+    ctx.moveTo(W2(CX-88,4),W2(GY,0.7));
+    ctx.lineTo(W2(CX+88,4),W2(GY,0.7));
+    ctx.stroke();
+    const g=ctx.createRadialGradient(CX,GY,0,CX,GY,38);
+    g.addColorStop(0,ink(0.07)); g.addColorStop(1,ink(0));
+    ctx.fillStyle=g; ctx.fillRect(CX-38,GY-4,76,8);
+  }
+
+  function drawAtmosphere() {
+    // Papers based on weather — more papers when weather is chaotic
+    const cnt = Math.round(13 - wt*2.2);  // 3 to 11
+    for(let i=0;i<cnt;i++) {
+      const px=CX+(rng()-0.5)*W*0.82;
+      const py=GY-12-rng()*(H-80);
+      paperScrap(px,py,(rng()-0.5)*Math.PI*0.6, 0.6+rng()*0.5);
+    }
+    if(wt<2){ ctx.fillStyle=ink(0.012); ctx.fillRect(0,0,W,H); }
+  }
+
+  function drawRoots(p) {
+    const cnt = 3+Math.round(ro*0.65);  // 3–6
+    const maxL = 13+ro*9;
+    const underground = ro>3?0.78:ro>2?0.5:0.22;
+    for(let i=0;i<cnt;i++){
+      const angle=(Math.PI/(cnt-1))*i;
+      const L=maxL*(0.6+rng()*0.4)*p;
+      const tx=CX+Math.cos(Math.PI+angle)*L;
+      const ty=GY+Math.abs(Math.sin(angle))*L*underground;
+      const cx1=CX+Math.cos(Math.PI+angle)*L*0.4+W2(0,2);
+      const cy1=GY+Math.abs(Math.sin(angle))*L*underground*0.35+W2(0,1.5);
+      ctx.beginPath();
+      ctx.moveTo(W2(CX,0.4),GY);
+      ctx.quadraticCurveTo(W2(cx1,1.5),W2(cy1,1),W2(tx,1.5),W2(ty,2));
+      ctx.strokeStyle=ink(0.2+ro*0.04);
+      ctx.lineWidth=Math.max(0.5,0.9+ro*0.16);
+      ctx.lineCap='round'; ctx.stroke();
+      // Stuck papers for unprocessed roots
+      if(ro<2.5&&rng()>0.55){
+        paperScrap(CX+Math.cos(Math.PI+angle)*L*0.55+W2(0,4),
+                   GY+Math.abs(Math.sin(angle))*L*underground*0.4+W2(0,3),
+                   rng()*0.5, 0.55);
+      }
+    }
+  }
+
+  function drawTrunk(p) {
+    if(p<=0)return;
+    const topY=GY-TH*p;
+    const lean=(pp)=>pp*leanPx*0.28;
+
+    // Bark streaks
+    const nStreaks=1+Math.round(th*0.7);
+    for(let i=0;i<nStreaks;i++){
+      const sx=CX-TB*0.3+(TB*0.6/Math.max(1,nStreaks-1))*i;
+      ctx.beginPath();
+      ctx.moveTo(W2(sx,0.4),GY-TH*0.05);
+      ctx.lineTo(W2(sx+W2(0,2),0.4),topY+TH*0.07);
+      ctx.strokeStyle=ink(0.04+rng()*0.04);
+      ctx.lineWidth=0.5; ctx.stroke();
+    }
+
+    // Trunk shape
+    ctx.beginPath();
+    ctx.moveTo(W2(CX-TB/2,0.4),GY);
+    ctx.bezierCurveTo(
+      W2(CX-TB/2+1,0.8),GY-TH*0.38*p,
+      W2(CX-TB*0.18+lean(0.7),0.8),GY-TH*0.72*p,
+      W2(CX-TB*0.14+lean(1),0.6),topY
     );
-    ctx.strokeStyle = `rgba(26,26,24,${0.3 + rootH * 0.08})`;
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-  }
-  ctx.restore();
+    ctx.bezierCurveTo(
+      W2(CX+TB*0.18+lean(0.7),0.8),GY-TH*0.72*p,
+      W2(CX+TB/2-1,0.8),GY-TH*0.38*p,
+      W2(CX+TB/2,0.4),GY
+    );
+    ctx.closePath();
+    ctx.fillStyle=ink(0.03); ctx.fill();
+    ctx.strokeStyle=ink(0.44+th*0.07);
+    ctx.lineWidth=1.1; ctx.stroke();
 
-  // Ground line
-  ctx.save();
-  ctx.beginPath();
-  ctx.moveTo(cx - 80, ground); ctx.lineTo(cx + 80, ground);
-  ctx.strokeStyle = 'rgba(26,26,24,0.15)'; ctx.lineWidth = 1; ctx.stroke();
-  ctx.restore();
-
-  // Trunk
-  ctx.save();
-  ctx.beginPath();
-  ctx.moveTo(cx - trunkW / 2, ground);
-  ctx.lineTo(cx - trunkW / 3, ground - trunkH);
-  ctx.lineTo(cx + trunkW / 3, ground - trunkH);
-  ctx.lineTo(cx + trunkW / 2, ground);
-  ctx.closePath();
-  ctx.strokeStyle = `rgba(26,26,24,${0.5 + treeH * 0.08})`;
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-  ctx.restore();
-
-  // Branches
-  const branchTop = ground - trunkH;
-  function drawBranch(x, y, angle, len, depth) {
-    if (depth === 0 || len < 5) return;
-    const ex = x + Math.cos(angle) * len;
-    const ey = y - Math.sin(angle) * len;
-    ctx.beginPath();
-    ctx.moveTo(x, y); ctx.lineTo(ex, ey);
-    ctx.strokeStyle = `rgba(26,26,24,${0.3 + treeH * 0.07})`;
-    ctx.lineWidth = Math.max(0.5, depth * 0.6);
-    ctx.stroke();
-    drawBranch(ex, ey, angle - 0.3 - (1 - drawH) * 0.2, len * 0.65, depth - 1);
-    drawBranch(ex, ey, angle + 0.3 + (1 - drawH) * 0.2, len * 0.65, depth - 1);
-  }
-  ctx.save();
-  drawBranch(cx, branchTop, Math.PI / 2, 22 + treeH * 3, 4);
-  drawBranch(cx, branchTop - 10, Math.PI / 2 - 0.5, 18 + treeH * 2, 3);
-  drawBranch(cx, branchTop - 10, Math.PI / 2 + 0.5, 18 + treeH * 2, 3);
-  ctx.restore();
-
-  // Canopy
-  ctx.save();
-  const canopyY = ground - trunkH - canopyR * 0.6;
-  ctx.beginPath();
-  ctx.arc(cx, canopyY, canopyR, 0, Math.PI * 2);
-  ctx.fillStyle = `rgba(26,26,24,${0.06 + treeH * 0.03})`;
-  ctx.fill();
-  ctx.strokeStyle = `rgba(26,26,24,${0.15 + treeH * 0.04})`;
-  ctx.lineWidth = 1;
-  ctx.stroke();
-  ctx.restore();
-
-  // Frame bands on trunk
-  if (frameH < 3.5) {
-    const fCount = Math.round(5 - frameH);
-    ctx.save();
-    for (let i = 0; i < fCount; i++) {
-      const fy = ground - 15 - i * 14;
-      const fw = trunkW * 1.6 + i * 2;
+    // Crack for low health
+    if(th<2.5&&p>0.55){
       ctx.beginPath();
-      ctx.rect(cx - fw / 2, fy - 8, fw, 9);
-      ctx.strokeStyle = 'rgba(26,26,24,0.25)';
-      ctx.lineWidth = 0.8;
-      ctx.stroke();
+      ctx.moveTo(CX+1.5,GY-TH*0.36);
+      ctx.lineTo(CX+5,GY-TH*0.44);
+      ctx.lineTo(CX+3,GY-TH*0.52);
+      ctx.strokeStyle=ink(0.22); ctx.lineWidth=0.7; ctx.stroke();
     }
-    ctx.restore();
   }
 
-  // Scattered papers (seeded)
-  const paperCount = Math.round(weatherH < 3 ? 8 : 4);
-  ctx.save();
-  for (let i = 0; i < paperCount; i++) {
-    const px = cx - 140 + rand() * 280;
-    const py = ground - 20 - rand() * 80;
-    const pw = 10 + rand() * 8;
-    const ph = 13 + rand() * 8;
-    const rot = (rand() - 0.5) * 1.2;
-    ctx.save();
-    ctx.translate(px, py);
-    ctx.rotate(rot);
-    ctx.beginPath();
-    ctx.rect(-pw / 2, -ph / 2, pw, ph);
-    ctx.strokeStyle = 'rgba(26,26,24,0.12)';
-    ctx.lineWidth = 0.7;
-    ctx.stroke();
-    for (let l = 0; l < 2; l++) {
-      ctx.beginPath();
-      ctx.moveTo(-pw / 2 + 2, -ph / 2 + 4 + l * 4);
-      ctx.lineTo(pw / 2 - 2, -ph / 2 + 4 + l * 4);
-      ctx.strokeStyle = 'rgba(26,26,24,0.07)';
-      ctx.lineWidth = 0.5;
-      ctx.stroke();
-    }
-    ctx.restore();
-  }
-  ctx.restore();
+  function drawBranches(p) {
+    if(p<=0) return;
+    const topX=CX+leanPx*0.28, topY=GY-TH;
 
-  // External influence arrows (seeded)
-  if (extH < 3) {
-    ctx.save();
-    for (let i = 0; i < 3; i++) {
-      const ax = 20 + rand() * 60;
-      const ay = ground - 60 - rand() * 80;
+    function branch(x,y,angle,len,depth,w) {
+      if(depth===0||len<3.5) return;
+      const sl=len*p;
+      const ex2=x+Math.cos(angle)*sl, ey2=y-Math.sin(angle)*sl;
+      const mx=(x+ex2)/2+W2(0,sl*0.11), my=(y+ey2)/2+W2(0,sl*0.055);
       ctx.beginPath();
-      ctx.moveTo(ax, ay); ctx.lineTo(ax + 20, ay + 5);
-      ctx.strokeStyle = 'rgba(26,26,24,0.1)';
-      ctx.lineWidth = 0.8;
-      ctx.stroke();
+      ctx.moveTo(W2(x,0.4),W2(y,0.4));
+      ctx.quadraticCurveTo(W2(mx,0.8),W2(my,0.8),W2(ex2,0.4),W2(ey2,0.4));
+      ctx.strokeStyle=ink(0.36+th*0.06);
+      ctx.lineWidth=Math.max(0.35,w); ctx.lineCap='round'; ctx.stroke();
+      if(depth<=2) leafPos.push({x:ex2,y:ey2,angle,sz:depth===1?1:0.65});
+      const n=(depth>3&&rng()>0.35)?3:2;
+      for(let i=0;i<n;i++){
+        const off=i===0?-BSPREAD*(0.55+rng()*0.45)+W2(0,0.06):BSPREAD*(0.55+rng()*0.45)+W2(0,0.06);
+        branch(ex2,ey2,angle+off,len*(BDECAY+W2(0,0.04)),depth-1,w*0.64);
+      }
     }
-    ctx.restore();
+    branch(topX,topY,Math.PI/2,BINIT,5,TB*0.22);
+    branch(CX+leanPx*0.18,GY-TH*0.82,Math.PI/2-0.48,BINIT*0.7,4,TB*0.16);
+    branch(CX+leanPx*0.18,GY-TH*0.82,Math.PI/2+0.48,BINIT*0.7,4,TB*0.16);
   }
+
+  function drawLeaves(p) {
+    if(p<=0) return;
+    leafPos.forEach(({x,y,angle,sz}) => {
+      if(rng()<0.38){
+        paperScrap(W2(x,1.5),W2(y,1.5),angle+W2(0,0.35),sz*0.65*p);
+      } else {
+        ctx.save();
+        ctx.translate(W2(x,1.5),W2(y,1.5));
+        ctx.rotate(angle-Math.PI/2+W2(0,0.4));
+        ctx.beginPath();
+        ctx.ellipse(0,0,sz*2.2,sz*3.5,0,0,Math.PI*2);
+        ctx.fillStyle=ink((0.045+rng()*0.05)*p);
+        ctx.fill(); ctx.restore();
+      }
+    });
+  }
+
+  function drawFrameMarks(p) {
+    // Core beliefs as red frame bands — OMORI red, only accent color
+    if(cb>3.9||p<=0) return;
+    const n=Math.round((3.9-cb)*1.4+0.5);  // 1–4 marks
+    for(let i=0;i<n;i++){
+      const frac=(i+0.65)/(n+0.7);
+      const fy=GY-TH*frac*p;
+      const fw=(TB*(1-frac*0.5)+1.8)*1.25;
+      const alpha=(0.42+i*0.05)*p;
+      ctx.strokeStyle=red(alpha); ctx.lineWidth=1.4;
+      ctx.beginPath(); ctx.moveTo(W2(CX-fw,0.4),W2(fy,0.4)); ctx.lineTo(W2(CX+fw,0.4),W2(fy,0.4)); ctx.stroke();
+      ctx.strokeStyle=red(alpha*0.48); ctx.lineWidth=0.7;
+      ctx.beginPath(); ctx.moveTo(W2(CX-fw*0.84,0.3),W2(fy+3.5,0.3)); ctx.lineTo(W2(CX+fw*0.84,0.3),W2(fy+3.5,0.3)); ctx.stroke();
+    }
+  }
+
+  function drawExternal() {
+    if(ex>=3.2) return;
+    const intensity=(3.2-ex)/2.2;
+    ctx.save(); ctx.setLineDash([1.5,3.5]);
+    for(let i=0;i<4;i++){
+      const ay=GY-28-rng()*(TH*0.75);
+      ctx.beginPath();
+      ctx.moveTo(0,W2(ay,7));
+      ctx.lineTo(CX-TB*0.55,W2(ay+W2(0,5),2));
+      ctx.strokeStyle=ink(0.07*intensity); ctx.lineWidth=0.6; ctx.stroke();
+    }
+    ctx.setLineDash([]); ctx.restore();
+  }
+
+  function drawAll(p) {
+    ctx.clearRect(0,0,W,H);
+    drawBg();
+    if(p>0.04) drawAtmosphere();
+    drawRoots(Math.min(1,p/0.3));
+    drawGround();
+    drawTrunk(p<0.18?0:Math.min(1,(p-0.18)/0.37));
+    leafPos.length=0;
+    drawBranches(p<0.46?0:Math.min(1,(p-0.46)/0.37));
+    drawFrameMarks(p<0.56?0:Math.min(1,(p-0.56)/0.32));
+    drawLeaves(p<0.76?0:Math.min(1,(p-0.76)/0.24));
+    if(p>0.7) drawExternal();
+  }
+
+  if(!animated||REDUCED){ drawAll(1); return; }
+  let t=0;
+  (function frame(){
+    t=Math.min(1,t+0.014);
+    drawAll(1-Math.pow(1-t,3));  // ease-out cubic
+    if(t<1) requestAnimationFrame(frame);
+  })();
 }
 
 // ══════════════════════════════════════════════
-// INIT — check for shared result in URL hash
+// INIT — check shared URL hash
 // ══════════════════════════════════════════════
 (function init() {
   const shared = parseShareHash(location.hash);
   if (shared) {
     lang = shared.lang;
     questions = QUESTIONS[lang];
-    // Reconstruct scores object so buildResult can work
-    // (all scores are pre-computed into dimScores directly)
-    scores = { tree: [shared.d.tree], drawing: [shared.d.drawing], frame: [shared.d.frame],
-               weather: [shared.d.weather], external: [shared.d.external], root: [shared.d.root] };
-    const c = COPY[lang];
-    // Set action button labels before buildResult reads them
-    document.getElementById('btn-save').textContent = c.btnSave;
-    document.getElementById('btn-share').textContent = c.btnShare;
-    document.getElementById('btn-restart').textContent = c.btnRestart;
+    scores = {
+      tree:[shared.d.tree], drawing:[shared.d.drawing], frame:[shared.d.frame],
+      weather:[shared.d.weather], external:[shared.d.external], root:[shared.d.root],
+    };
     buildResult(true);
     showScreen('result');
     animateBars();
-    drawTree();
+    drawTreeOnCanvas(document.getElementById('treeCanvas'), shared.d, true);
   } else {
     showScreen('lang');
   }
